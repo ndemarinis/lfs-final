@@ -9,21 +9,26 @@
 --  - Packets arrive at table 0
 --  - Packets only get to subsequent tables if resubmitted to them
 --  - If there are multiple matches, multiple action sets are executed
-open util/ordering[Table] as to
+open util/ordering[Table_Id] as to
 open util/ordering[Event] as eo
 
 sig Switch {
-	tables: Table
+	tables: Table_Id some -> one Table
+} {
+    Table_Id in tables.Table
 }
 
+sig Table_Id { }
+
 sig Table {
+    table_id: some Table_Id,
 	rules: Rule
 }
 
 sig Rule {
 	match : one Match,
-	action : some Action,
- 	timeout_actions: Action,
+	action : seq Action,
+ 	timeout_actions: seq Action,
 }
 
 sig Match {
@@ -32,10 +37,12 @@ sig Match {
 lone sig CatchallMatch extends Match {}
 
 abstract sig Action {
+} {
+  Action in Rule.action.elems
 }
 
 sig Resubmit extends Action {
-  table: one Table
+  table: one Table_Id
 }
 
 sig Output extends Action {
@@ -43,7 +50,7 @@ sig Output extends Action {
 }
 
 sig Learn extends Action {
-	table: one Table,
+	table: one Table_Id,
 	rule: one Rule
 }
 
@@ -60,28 +67,38 @@ sig State {
 abstract sig Event {
 	pre, post: State,
 	actions_executed: seq Action
-}
+} 
 
 
 
 -- Get new rules from a set of learn actions
-fun learned_rules[actions: Action] : (Table -> Rule) {
-	let learns = (actions & Learn) | {
-		all l : learns | {
-      l.table -> l.rule
-    }
-	}
+fun learned_rules[actions: Action] : (Table_Id -> Rule) {
+	{t : Table_Id, r : Rule | {
+      some learn : (actions & Learn) | {
+        t = learn.table
+        r = learn.rule
+      }
+    }}
+
 }
 
+-- Accumulate matches
+-- ASSUMING RESUMBIT THROUGH ALL TABLES
+/*
 fun execute(p : Packet, s : Switch) : seq Action {
+    switch.Table_Id
+    -- switch.first's matching rule's actions + resubmit transitive closure's actions
 
+  -- execute table 0,
+  -- execute all actions in further tables
 }
+*/
 
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	actions_executed = execute[packet, pre.switch]
-	post.switch = pre.switch ++ learned_rules[actions_executed]
+	--actions_executed = execute[packet, pre.switch]
+	--post.switch = pre.switch ++ learned_rules[actions_executed]
 }
 
 -- Timeouts can be nondeterministic for now
@@ -91,12 +108,12 @@ sig Timeout extends Event {
 } {
 	-- Rule must be present in a switch table
 	rule  in table.rules
-	table in pre.switch.tables
+	table in pre.switch.tables[Table_Id]
 
 	actions_executed = rule.timeout_actions
 
 	-- Warning:  might have issues if we learn the rule that timed out
-	post.switch = (pre.switch - (table -> rule)) ++ learned_rules[actions_executed]
+	--post.switch = (pre.switch - (table -> rule)) ++ learned_rules[actions_executed]
 }
 
 
@@ -112,6 +129,13 @@ sig Packet {
 	match: one Match
 }
 
+fact forward_resubmit {
+    all s : Switch, t : Table | {
+        t in s.tables[Table_Id] 
+        (t.rules.action.elems & Resubmit).table in to/nexts[t.table_id]
+    }
+}
+
 -- Facts
 --  - Only new rules are added by learns
 --  - 
@@ -119,7 +143,7 @@ sig Packet {
 
 -- Given a packet, find a match on the given tables
 
-run {} for 5
+run {} for 5 but exactly 5 Action
 
 
 
