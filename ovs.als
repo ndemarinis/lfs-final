@@ -23,7 +23,7 @@ sig Table_Id { }
 sig Table {
     table_id: some Table_Id,
 	rules: Rule
-}
+} 
 
 sig Rule {
 	match : one Match,
@@ -42,7 +42,8 @@ abstract sig Action {
 }
 
 sig Resubmit extends Action {
-  table: one Table_Id
+	from: one Table_Id,
+  to: one Table_Id
 }
 
 sig Output extends Action {
@@ -84,6 +85,8 @@ fun learned_rules[actions: Action] : (Table_Id -> Rule) {
 
 -- Accumulate matches
 -- ASSUMING RESUMBIT THROUGH ALL TABLES
+-- Accumulate a sequence of actions from all tables where
+-- Switch$0.tables[Table_Id$0].rules.match & p.math
 /*
 fun execute(p : Packet, s : Switch) : seq Action {
     switch.Table_Id
@@ -91,6 +94,7 @@ fun execute(p : Packet, s : Switch) : seq Action {
 
   -- execute table 0,
   -- execute all actions in further tables
+	
 }
 */
 
@@ -129,11 +133,25 @@ sig Packet {
 	match: one Match
 }
 
+-- Table IDs can't change between tables
+fact table_id_matches_switch {
+	all t: Table | {
+		t.table_id = Switch.tables.t
+	}
+}
+
+-- Resubmits must always go to a higher table_id
 fact forward_resubmit {
     all s : Switch, t : Table | {
         t in s.tables[Table_Id] 
-        (t.rules.action.elems & Resubmit).table in to/nexts[t.table_id]
+        (t.rules.action.elems & Resubmit).to in to/nexts[t.table_id]
     }
+}
+
+fact resubmit_from {
+	all t: Table, r: Resubmit | {
+			r in t.rules.action.elems implies (r.from = t.table_id)
+	}
 }
 
 -- Facts
@@ -143,8 +161,13 @@ fact forward_resubmit {
 
 -- Given a packet, find a match on the given tables
 
-run {} for 5 but exactly 5 Action
+run {} for 5 but exactly 2 Resubmit
 
+
+/*
+ * TODO
+ *   - Assert that resubmit's from is modeled accurately
+ */
 
 
 
