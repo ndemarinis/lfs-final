@@ -21,7 +21,7 @@ sig Switch {
 sig Table_Id { }
 
 sig Table {
-    table_id: some Table_Id,
+  table_id: some Table_Id,
 	rules: Rule
 } 
 
@@ -29,6 +29,8 @@ sig Rule {
 	match : one Match,
 	action : seq Action,
  	timeout_actions: seq Action,
+} {
+	some action
 }
 
 sig Match {
@@ -97,11 +99,39 @@ fun execute(p : Packet, s : Switch) : seq Action {
 	
 }
 */
+// some mc : (p.match & r.match) | i -> a = mc.action
+/*
+fun get_matching_actions(p: Packet, r: Rule) : seq Action {
+		{ i: Int, a : Action | some mc : (p.match & r.match) | i -> a = (r.mc).action }
+}
+*/
 
+/* 
+ * Why this is hard
+ *   - Catchall match:  can't just take actions where match is equal,
+ *                      need to take catchall rule if no other matches in a given table
+ *   - Need to grab actions as a sequence and append them to a sequence
+ *   - Need to take tables in order
+ *   - Need to handle resubmits (and actions that may be added with them)
+ *   - 
+ */
+fun execute(p: Packet, s: Switch) : seq Action {
+		
+	let a = s.tables[to/first].rules.action | {
+					a.append[s.tables[to/last].rules.action]
+	}
+}
+
+// Get actions for one table (and tables to which it may resubmit)
+/*
+fun resubmit(m : Match , t: Table, s: Switch): seq Action {
+
+}
+*/
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	--actions_executed = execute[packet, pre.switch]
+	actions_executed = execute[packet, pre.switch]
 	--post.switch = pre.switch ++ learned_rules[actions_executed]
 }
 
@@ -161,7 +191,7 @@ fact resubmit_from {
 
 -- Given a packet, find a match on the given tables
 
-run {} for 5 but exactly 2 Resubmit
+run {} for 2 but exactly 2 Table_Id
 
 
 /*
