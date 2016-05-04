@@ -12,17 +12,22 @@
 open util/ordering[Event] as eo
 
 sig Switch {
-	rules: some Rule
+	--rules: some Rule
+	rules: Match lone -> ActionList
 }
 
 
-
+/*
 sig Rule {
 	match : one Match,
 	action : seq Action,
  	--timeout_actions: seq Action,
 } {
 	some action
+}*/
+
+sig ActionList {
+	actions: seq Action
 }
 
 sig Match {
@@ -32,7 +37,7 @@ lone sig CatchallMatch extends Match {}
 
 abstract sig Action {
 } {
-  Action in Rule.action.elems
+  Action in ActionList.actions.elems
 }
 
 sig Output extends Action {
@@ -40,7 +45,7 @@ sig Output extends Action {
 }
 
 sig Learn extends Action {
-	rule: one Rule
+	rule: Match one -> one ActionList
 }
 
 sig Drop extends Action {}
@@ -53,24 +58,15 @@ sig State {
 
 abstract sig Event {
 	pre, post: State,
-	actions_executed: seq Action
+	actions_executed: ActionList
 } 
 
-fun get_matching_actions[s: Switch, p: Packet] : (seq Action) {
-		(p.match in s.rules.match) =>
-				{ i: Int, a: Action | { 
-						some r: Rule | {
-							r.match = p.match
-							i -> a in r.action
-						}
-				  }} 
+
+fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {
+		(p.match in s.rules.ActionList) =>
+				s.rules[p.match]
 		else { -- Table miss
-			{ i: Int, a: Action | {
-					some r: Rule | {
-						r.match = CatchallMatch
-						i -> a in r.action
-					}
-				}}
+				s.rules[CatchallMatch]
 		}
 }
 
