@@ -13,7 +13,7 @@ open util/ordering[Event] as eo
 
 sig Switch {
 --	tables: seq Table
-	tables: Int some -> some Rule
+	tables: seq/Int -> some Rule 
 }
 
 sig Rule {
@@ -155,30 +155,20 @@ sig Packet {
 	match: one Match
 }
 
-
+/*
 -- Resubmits must always go to a higher table_id
 fact forward_resubmit {
-/*
-    all s : Switch, t : s.tables.Rule | {
-        --t in s.tables[Table_Id] 
-        (t.rules.action.elems & Resubmit).to in to/nexts[t.table_id]
-    }
-*/
 	all s: Switch, t: s.tables.Rule | {
 			(s.tables[t].action.elems & Resubmit).to > t
 	}
 }
 
 fact resubmit_from {
-/*
-	all t: Table, r: Resubmit | {
-			r in t.rules.action.elems implies (r.from = t.table_id)
-	}
-*/
 	all s: Switch, t: s.tables.Rule, r: Resubmit | {
 			r in s.tables[t].action.elems implies (r.from = t)
 	}
 }
+*/
 
 -- Facts
 --  - Only new rules are added by learns
