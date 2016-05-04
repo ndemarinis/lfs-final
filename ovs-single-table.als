@@ -45,7 +45,9 @@ sig Output extends Action {
 }
 
 sig Learn extends Action {
-	rule: Match one -> one ActionList
+	rule: Match -> ActionList
+} {
+	#rule = 1
 }
 
 sig Drop extends Action {}
@@ -72,16 +74,28 @@ fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {
 
 -- We only need to care about the learns
 /*
-fun execute[s: Switch, a: seq Action] : (one Switch) {
-		
+pred execute[pre: Switch, post: Switch, a: ActionList] {
+	all m: pre.rules.ActionList |
+		let lastLearn = a.lastIdxOf[]
 }
 */
 
-/*
-fun execute_learn[s: Switch, l: Learn] : (Switch) {
-		switch.rules ++ l.rule
+fun execute_if_learn[s: Switch, a: Action]: (Switch) {
+		{ss: Switch | some s2: Switch | { 
+						s2.rules = ((a in Learn) => {
+													execute_learn[s, (a :> Learn)] 
+												} else { 
+														s.rules
+												})
+		}}
 }
-*/
+
+
+fun execute_learn[s: Switch, l: Learn] : (Match -> ActionList) {
+		s.rules ++ l.rule
+}
+
+
 
 fact one_catchall {
 	one CatchallMatch
