@@ -74,6 +74,19 @@ fun get_matching_actions[s: Switch, p: Packet] : (seq Action) {
 		}
 }
 
+-- We only need to care about the learns
+/*
+fun execute[s: Switch, a: seq Action] : (one Switch) {
+		
+}
+*/
+
+/*
+fun execute_learn[s: Switch, l: Learn] : (Switch) {
+		switch.rules ++ l.rule
+}
+*/
+
 fact one_catchall {
 	one CatchallMatch
 }

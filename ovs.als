@@ -12,7 +12,6 @@
 open util/ordering[Event] as eo
 
 sig Switch {
---	tables: seq Table
 	tables: seq/Int -> some Rule 
 }
 
