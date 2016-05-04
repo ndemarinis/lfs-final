@@ -63,11 +63,21 @@ abstract sig Event {
 	exec_steps: seq Switch,
 	actions_executed: ActionList
 } {
-	#(exec_steps.inds) = #(actions_executed.actions.inds)
+	#(exec_steps.inds) = #(actions_executed.actions.inds) -- Should there be 1 more exec_step than actions?
 	exec_steps.first = pre.switch
 	exec_steps.last = post.switch
 }
 
+fact exection_steps {
+	all e : Event | {
+		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
+			let idx' = add[idx, 1] | {
+				-- Make the switch updates
+				e.exec_steps[idx'] = execute_if_learn[e.exec_steps[idx], e.actions_executed.actions[idx]]
+			}
+		}
+	}
+}
 
 fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {
 		(p.match in s.rules.ActionList) =>
