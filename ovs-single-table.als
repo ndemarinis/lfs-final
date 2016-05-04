@@ -60,8 +60,13 @@ sig State {
 
 abstract sig Event {
 	pre, post: State,
+	exec_steps: seq Switch,
 	actions_executed: ActionList
-} 
+} {
+	#(exec_steps.inds) = #(actions_executed.actions.inds)
+	exec_steps.first = pre.switch
+	exec_steps.last = post.switch
+}
 
 
 fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {
@@ -101,65 +106,11 @@ fact one_catchall {
 	one CatchallMatch
 }
 
-/*
--- Get new rules from a set of learn actions
-fun learned_rules[actions: Action] : (Rule) {
-	{ r : Rule | {
-      some learn : (actions & Learn) | {
-        r = learn.rule
-      }
-    }}
-}
-*/
 
--- Accumulate matches
--- ASSUMING RESUMBIT THROUGH ALL TABLES
--- Accumulate a sequence of actions from all tables where
--- Switch$0.tables[Table_Id$0].rules.match & p.math
-/*
-fun execute(p : Packet, s : Switch) : seq Action {
-    switch.Table_Id
-    -- switch.first's matching rule's actions + resubmit transitive closure's actions
-
-  -- execute table 0,
-  -- execute all actions in further tables
-	
-}
-*/
-// some mc : (p.match & r.match) | i -> a = mc.action
-/*
-fun get_matching_actions(p: Packet, r: Rule) : seq Action {
-		{ i: Int, a : Action | some mc : (p.match & r.match) | i -> a = (r.mc).action }
-}
-*/
-
-/* 
- * Why this is hard
- *   - Catchall match:  can't just take actions where match is equal,
- *                      need to take catchall rule if no other matches in a given table
- *   - Need to grab actions as a sequence and append them to a sequence
- *   - Need to take tables in order
- *   - Need to handle resubmits (and actions that may be added with them)
- *   - 
- */
-/*
-fun execute(p: Packet, s: Switch) : seq Action {
-		
-	let a = s.tables[to/first].rules.action | {
-					a.append[s.tables[to/last].rules.action]
-	}
-}
-*/
-
-// Get actions for one table (and tables to which it may resubmit)
-/*
-fun resubmit(m : Match , t: Table, s: Switch): seq Action {
-
-}
-*/
 sig Arrival extends Event {
 	packet: one Packet
 } {
+
 	--actions_executed = execute[packet, pre.switch]
 	--post.switch = pre.switch ++ learned_rules[actions_executed]
 }
