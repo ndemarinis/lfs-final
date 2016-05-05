@@ -112,12 +112,15 @@ pred execute[pre: Switch, post: Switch, a: ActionList] {
 */
 
 fun execute_if_learn[s: Switch, a: Action]: (Switch) {
-		{ss: Switch | some s2: Switch | { 
-						s2.rules = ((a in Learn) => {
-													execute_learn[s, (a :> Learn)] 
-												} else { 
-														s.rules
-												})
+		{ s2: Switch | { 
+						--s2.rules = ((a in Learn) => {
+						--							execute_learn[s, (a :> Learn)] 
+						--						} else { 
+						--								s.rules
+						--						})
+			a in Learn =>
+				s2.rules = execute_learn[s, (a :> Learn)] else
+				s2.rules = s.rules
 		}}
 }
 
@@ -151,7 +154,13 @@ sig Packet {
 
 -- Given a packet, find a match on the given tables
 
-run {} for 2 but 5 Int, exactly 1 Arrival, 5 Switch
+fact force_learn {
+	some e: Event | {
+		e.pre.switch != e.post.switch
+	}
+}
+
+run {} for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
 
 
 /*
