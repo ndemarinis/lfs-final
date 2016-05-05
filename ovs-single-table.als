@@ -162,6 +162,20 @@ fact force_learn {
 
 run {} for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
 
+-- We need to ensure that only learn actions can change switches
+assert only_learn_changes {
+	all e : Event | {
+		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
+			let idx' = add[idx, 1] | {
+				e.exec_steps[idx] != e.exec_steps[idx'] =>
+					e.actions_executed.actions[idx] in Learn else
+					e.actions_executed.actions[idx] not in Learn
+			}
+		}
+	}
+}
+
+check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
 
 /*
  * TODO
