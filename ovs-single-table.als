@@ -65,24 +65,20 @@ abstract sig Event {
 	exec_steps: seq Switch,
 	actions_executed: ActionList
 } {
-	-- Should there be 1 more exec_step than actions?  I think so.
-	--#(actions_executed.actions.inds) = 	add[#(exec_steps.inds), 1]
 	#(exec_steps.inds) = add[#(actions_executed.actions.inds), 1]
 
 	exec_steps.first = pre.switch
 	exec_steps.last = post.switch
-	--pre.switch.rules != post.switch.rules
 }
-/*
+
 fact transitions {
 	all e: Event - eo/last | {
 		let eNext = e.next | {
-				-- one e: Event | e.pre = s and e.post = s'
-				e.post.switch = eNext.pre.switch
+				e.post = eNext.pre
 		}	
 	}
 }
-*/
+
 
 fact exection_steps {
 	all e : Event | {
@@ -113,11 +109,6 @@ pred execute[pre: Switch, post: Switch, a: ActionList] {
 
 fun execute_if_learn[s: Switch, a: Action]: (Switch) {
 		{ s2: Switch | { 
-						--s2.rules = ((a in Learn) => {
-						--							execute_learn[s, (a :> Learn)] 
-						--						} else { 
-						--								s.rules
-						--						})
 			a in Learn =>
 				s2.rules = execute_learn[s, (a :> Learn)] else
 				s2.rules = s.rules
@@ -139,7 +130,7 @@ fact one_catchall {
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	--actions_executed = get_matching_actions[pre.switch, packet]
+	actions_executed = get_matching_actions[pre.switch, packet]
 }
 
 
