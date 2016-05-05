@@ -28,6 +28,8 @@ sig Rule {
 
 sig ActionList {
 	actions: seq Action
+} {
+		some actions
 }
 
 sig Match {
@@ -63,10 +65,24 @@ abstract sig Event {
 	exec_steps: seq Switch,
 	actions_executed: ActionList
 } {
-	#(exec_steps.inds) = #(actions_executed.actions.inds) -- Should there be 1 more exec_step than actions?
+	-- Should there be 1 more exec_step than actions?  I think so.
+	--#(actions_executed.actions.inds) = 	add[#(exec_steps.inds), 1]
+	#(exec_steps.inds) = add[#(actions_executed.actions.inds), 1]
+
 	exec_steps.first = pre.switch
 	exec_steps.last = post.switch
+	--pre.switch.rules != post.switch.rules
 }
+/*
+fact transitions {
+	all e: Event - eo/last | {
+		let eNext = e.next | {
+				-- one e: Event | e.pre = s and e.post = s'
+				e.post.switch = eNext.pre.switch
+		}	
+	}
+}
+*/
 
 fact exection_steps {
 	all e : Event | {
@@ -120,9 +136,7 @@ fact one_catchall {
 sig Arrival extends Event {
 	packet: one Packet
 } {
-
-	--actions_executed = execute[packet, pre.switch]
-	--post.switch = pre.switch ++ learned_rules[actions_executed]
+	--actions_executed = get_matching_actions[pre.switch, packet]
 }
 
 
@@ -137,7 +151,7 @@ sig Packet {
 
 -- Given a packet, find a match on the given tables
 
-run {} for 2 but 5 Int
+run {} for 2 but 5 Int, exactly 1 Arrival, 5 Switch
 
 
 /*
