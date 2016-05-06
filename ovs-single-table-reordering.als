@@ -197,17 +197,35 @@ pred some_diff_actionlists[] {
 		}
 }
 
-pred reordering_has_effect[] {
-		some e: Event | {
-				e.exec_steps_ideal.last != e.exec_steps_permuted.last
-		}	
+pred reordering_has_effect[e: Event] {
+	e.exec_steps_ideal.last != e.exec_steps_permuted.last
 }
 
 diff_actionlists:
 run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
 has_effect:
-run { reordering_has_effect } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
+run { some e: Event | 
+				reordering_has_effect[e] 
+} for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
+
+-- Arrival$0.executed_actions.actions.subseq[min[((Arrival$0.executed_actions.actions - 
+-- Arrival$0.permuted_actions.actions) :> Learn).Learn], 
+-- Arrival$0.executed_actions.actions.lastIdx]
+assert reordered_learns_causes_effect {
+	all e: Event, l1, l2: Learn | {
+			reordering_has_effect[e] implies
+			let minDiffIdx = min[((e.executed_actions.actions - 
+														e.permuted_actions.actions) :> Learn).Learn] | {
+				let diff = e.executed_actions.actions.subseq[minDiffIdx,
+																						 e.executed_actions.actions.lastIdx] | {
+					l1 in diff[Int] and l2 in diff[Int] and 
+					l1.rule.ActionList = l2.rule.ActionList
+				}
+			}
+	}
+}
+check reordered_learns_causes_effect for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
 -- 
 -- Assertions
