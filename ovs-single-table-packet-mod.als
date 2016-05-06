@@ -150,6 +150,14 @@ fact packet_mod_holds {
 			}
 		}
 	}
+
+	all e : Arrival | {
+		all idx : e.packets.inds - e.packets.lastIdx | {
+			e.actions_executed.actions[idx] in Output =>
+			(e.actions_executed.actions[idx] <: Output).out_packet = e.packets[idx]
+		}
+	}
+	
 }
 
 sig Packet {
@@ -183,7 +191,7 @@ run {
 	some a : Arrival | {
 		#a.packets.elems > 1
 	}
-} for 5 but  exactly 1 Learn, exactly 1 PacketMod, exactly 2 Switch
+} for 5 but  exactly 1 Learn, exactly 1 PacketMod, exactly 2 Switch, exactly 1 Output
 
 
 -- We need to ensure that only learn actions can change switches
