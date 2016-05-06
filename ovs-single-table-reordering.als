@@ -14,6 +14,8 @@ open util/ordering[Event] as eo
 sig Switch {
 	--rules: some Rule
 	rules: Match lone -> ActionList
+} {
+	#rules.ActionList = #rules
 }
 
 
@@ -47,9 +49,9 @@ sig Output extends Action {
 }
 
 sig Learn extends Action {
-	rule: Match -> ActionList
+	rule: Match lone -> ActionList
 } {
-	#rule = 1
+	one rule
 }
 
 sig Drop extends Action {}
@@ -62,22 +64,30 @@ sig State {
 
 abstract sig Event {
 	pre, post: State,
-	exec_steps: seq Switch,
-	matched_actions: ActionList,
-	executed_actions: ActionList
-} {
-	#(exec_steps.inds) = add[#(matched_actions), 1]
 
-	exec_steps.first = pre.switch
-	exec_steps.last = post.switch
+	exec_steps_permuted: seq Switch,
+	exec_steps_ideal: seq Switch,
+	permuted_actions: ActionList,
+	executed_actions: ActionList,
+
+} {
+	#(exec_steps_permuted.inds) = add[#(permuted_actions.actions), 1]
+
+	#exec_steps_ideal = #exec_steps_permuted
+
+	exec_steps_permuted.first = pre.switch
+	exec_steps_ideal.first = pre.switch
+
+	exec_steps_ideal.last = post.switch
+
 
 	-- **** Reordering ****
 	-- The matched actions must be a permutation of the actions that are executed
-	is_permutation[matched_actions.actions, 
+	is_permutation[permuted_actions.actions, 
 								 executed_actions.actions]
 
 	-- For now, we can enforce that the actions MUST be reordered
-	matched_actions.actions != executed_actions.actions
+	permuted_actions.actions != executed_actions.actions
 }
 
 fact transitions {
@@ -89,13 +99,26 @@ fact transitions {
 }
 
 
-fact execution_steps {
+ -- Execution steps with possible reordering
+fact execution_steps_permuted {
 	all e : Event | {
-		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
+		all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
-				e.exec_steps[idx'] = execute_if_learn[e.exec_steps[idx], 
+				e.exec_steps_permuted[idx'] = execute_if_learn[e.exec_steps_permuted[idx], 
 																							e.executed_actions.actions[idx]]
+			}
+		}
+	}
+}
+
+fact execution_steps_ideal {
+	all e : Event | {
+		all idx : e.exec_steps_ideal.inds - e.exec_steps_ideal.lastIdx | {
+			let idx' = add[idx, 1] | {
+				-- Make the switch updates
+				e.exec_steps_ideal[idx'] = execute_if_learn[e.exec_steps_ideal[idx], 
+																										e.permuted_actions.actions[idx]]
 			}
 		}
 	}
@@ -133,7 +156,7 @@ fact one_catchall {
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	matched_actions = get_matching_actions[pre.switch, packet]
+	permuted_actions = get_matching_actions[pre.switch, packet]
 }
 
 
@@ -174,8 +197,17 @@ pred some_diff_actionlists[] {
 		}
 }
 
+pred reordering_has_effect[] {
+		some e: Event | {
+				e.exec_steps_ideal.last != e.exec_steps_permuted.last
+		}	
+}
+
 diff_actionlists:
-run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 2 Arrival
+run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
+
+has_effect:
+run { reordering_has_effect } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
 -- 
 -- Assertions
@@ -185,9 +217,9 @@ run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 2
 -- We need to ensure that only learn actions can change switches
 assert only_learn_changes {
 	all e : Event | {
-		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
+		all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {
 			let idx' = add[idx, 1] | {
-				e.exec_steps[idx] != e.exec_steps[idx'] =>
+				e.exec_steps_permuted[idx] != e.exec_steps_permuted[idx'] =>
 					e.executed_actions.actions[idx] in Learn else
 					e.executed_actions.actions[idx] not in Learn
 			}
