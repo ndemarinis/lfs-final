@@ -63,17 +63,21 @@ sig State {
 abstract sig Event {
 	pre, post: State,
 	exec_steps: seq Switch,
-	ideal_actions_executed: ActionList,
-	actual_actions_executed: ActionList
+	matched_actions: ActionList,
+	executed_actions: ActionList
 } {
-	#(exec_steps.inds) = add[#(ideal_actions_executed), 1]
-
-	-- The matched actions must be a permutation of the actions that are executed
-	is_permutation[ideal_actions_executed.actions, 
-								 actual_actions_executed.actions]
+	#(exec_steps.inds) = add[#(matched_actions), 1]
 
 	exec_steps.first = pre.switch
 	exec_steps.last = post.switch
+
+	-- **** Reordering ****
+	-- The matched actions must be a permutation of the actions that are executed
+	is_permutation[matched_actions.actions, 
+								 executed_actions.actions]
+
+	-- For now, we can enforce that the actions MUST be reordered
+	matched_actions.actions != executed_actions.actions
 }
 
 fact transitions {
@@ -91,7 +95,7 @@ fact execution_steps {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
 				e.exec_steps[idx'] = execute_if_learn[e.exec_steps[idx], 
-																							e.actual_actions_executed.actions[idx]]
+																							e.executed_actions.actions[idx]]
 			}
 		}
 	}
@@ -129,7 +133,7 @@ fact one_catchall {
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	ideal_actions_executed = get_matching_actions[pre.switch, packet]
+	matched_actions = get_matching_actions[pre.switch, packet]
 }
 
 
@@ -142,10 +146,12 @@ sig Packet {
 --  - 
 
 pred is_permutation[s: seq Action, s': seq Action] {
-	#s = #s'
-	and s.inds = s'.inds
-	and s.elems = s'.elems
-	and s != s'
+	#s = #s'                   -- Size must be the same
+	and s.inds = s'.inds       -- Must have the same indices
+	and s.elems = s'.elems     -- Elements must be the same
+	-- Finally, the count of each element must be the same
+	and (all a: s.elems |       
+				#(s.indsOf[a]) = #(s'.indsOf[a]))
 }
 
 
@@ -168,12 +174,12 @@ pred some_diff_actionlists[] {
 		}
 }
 
-run { some_diff_actionlists } for 5 but 5 Int, 5 Switch
+diff_actionlists:
+run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 2 Arrival
 
 -- 
 -- Assertions
 -- - Only learn causes executions
--- - No actions are ever dropped?
 --
 
 -- We need to ensure that only learn actions can change switches
@@ -182,8 +188,8 @@ assert only_learn_changes {
 		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
 			let idx' = add[idx, 1] | {
 				e.exec_steps[idx] != e.exec_steps[idx'] =>
-					e.actual_actions_executed.actions[idx] in Learn else
-					e.actual_actions_executed.actions[idx] not in Learn
+					e.executed_actions.actions[idx] in Learn else
+					e.executed_actions.actions[idx] not in Learn
 			}
 		}
 	}
