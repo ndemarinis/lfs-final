@@ -1,14 +1,10 @@
--- Things we need
--- - Multiple tables (via util/ordering)
--- - Packet events (arrival, timeout, skip)
--- - Actions (resubmit, output, learn, drop, increment, alert)
--- - Match criteria
+--
+-- ovs-single-table-packet-mod.als
+-- Single rule table with action to modify packets
+-- during rule execution; output action also holds the packet
+-- at time output was executed.
+--
 
-
--- Assertions/Properties
---  - Packets arrive at table 0
---  - Packets only get to subsequent tables if resubmitted to them
---  - If there are multiple matches, multiple action sets are executed
 open util/ordering[Event] as eo
 
 sig Switch {
@@ -16,15 +12,6 @@ sig Switch {
 	rules: Match lone -> ActionList
 }
 
-
-/*
-sig Rule {
-	match : one Match,
-	action : seq Action,
- 	--timeout_actions: seq Action,
-} {
-	some action
-}*/
 
 sig ActionList {
 	actions: seq Action
@@ -79,7 +66,7 @@ fact transitions {
 	all e: Event - eo/last | {
 		let eNext = e.next | {
 				e.post = eNext.pre
-		}	
+		}
 	}
 }
 
@@ -103,16 +90,8 @@ fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {
 		}
 }
 
--- We only need to care about the learns
-/*
-pred execute[pre: Switch, post: Switch, a: ActionList] {
-	all m: pre.rules.ActionList |
-		let lastLearn = a.lastIdxOf[]
-}
-*/
-
 fun execute_if_learn[s: Switch, a: Action]: (Switch) {
-		{ s2: Switch | { 
+		{ s2: Switch | {
 			a in Learn =>
 				s2.rules = execute_learn[s, (a :> Learn)] else
 				s2.rules = s.rules
@@ -141,6 +120,9 @@ sig Arrival extends Event {
 }
 
 fact packet_mod_holds {
+        -- If executing a PacketMod at a given step, the new match
+        -- criteria in the PacketMod action becomes the packet's match
+        -- criteria in the next execution step
 	all e : Arrival | {
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
@@ -151,13 +133,15 @@ fact packet_mod_holds {
 		}
 	}
 
+       -- An output action at a given step uses the match criteria
+       -- uses the packet for that execution step.
 	all e : Arrival | {
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			e.actions_executed.actions[idx] in Output =>
 			(e.actions_executed.actions[idx] <: Output).out_packet = e.packets[idx]
 		}
 	}
-	
+
 }
 
 sig Packet {
@@ -166,10 +150,8 @@ sig Packet {
 
 -- Facts
 --  - Only new rules are added by learns
---  - 
+--  -
 
-
--- Given a packet, find a match on the given tables
 
 fact force_learn {
 	some e: Event | {
@@ -194,6 +176,24 @@ run {
 } for 5 but  exactly 1 Learn, exactly 1 PacketMod, exactly 2 Switch, exactly 1 Output
 
 
+pred packet_mod_changes_packet[] {
+	some a: Arrival, pm: PacketMod | {
+		a.packet.match != pm.new_match
+	}
+}
+
+pred packet_mod_is_executed[] {
+	some a: Arrival, pm: PacketMod | {
+		pm in a.actions_executed.actions.elems
+	}
+}
+
+show_packet_mod:
+run {
+	packet_mod_is_executed
+	and packet_mod_changes_packet
+} for 5 but exactly 1 Arrival, exactly 1 PacketMod, exactly 1 Output
+
 -- We need to ensure that only learn actions can change switches
 assert only_learn_changes {
 	all e : Event | {
@@ -208,11 +208,3 @@ assert only_learn_changes {
 }
 
 check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn, 3 Match
-
-/*
- * TODO
- *   - Assert that resubmit's from is modeled accurately
- */
-
-
-
