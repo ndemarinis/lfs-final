@@ -126,9 +126,14 @@ fact packet_mod_holds {
 	all e : Arrival | {
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
-				e.actions_executed.actions[idx] in PacketMod =>
+				-- The next packet's match criteria should change if:
+				-- 1) The action we're executing is a PacketMod
+				-- 2) The packet's match criteria is different from the one in the PacketMod
+				-- This ensures Packet atoms only change when we actually modify a field.
+				(e.actions_executed.actions[idx] in PacketMod) && 
+				((e.actions_executed.actions[idx] & PacketMod).new_match != e.packets[idx].match) => {
 						e.packets[idx'].match = (e.actions_executed.actions[idx] <: PacketMod).new_match 
-					else { -- If we weren't executing a PacketMod, the packet itself should not change
+					} else { -- If we weren't executing a PacketMod, the packet itself should not change
 						e.packets[idx] = e.packets[idx']
 --					e.packets[idx].match = e.packets[idx'].match
 					}
@@ -218,8 +223,11 @@ assert only_packetmod_changes_packet {
 	all a: Arrival | {
 		all idx: a.packets.inds - a.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
+					-- If the packets are different, we must have executed a PacketMod
 					(a.packets[idx] != a.packets[idx']) implies 
-						(a.actions_executed.actions[idx] in PacketMod)				
+						(a.actions_executed.actions[idx] in PacketMod)
+					-- Alternate form that works with previous implementation:
+					-- a.packets[idx].match != a.packets[idx'].match implies ...
 			}
 		}
 	}
