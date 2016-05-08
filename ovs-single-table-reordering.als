@@ -88,7 +88,7 @@ fact execution_steps_permuted {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
 				e.exec_steps_permuted[idx'] = execute_if_learn[e.exec_steps_permuted[idx],
-																							e.executed_actions.actions[idx]]
+																											 e.permuted_actions.actions[idx]]
 			}
 		}
 	}
@@ -100,7 +100,7 @@ fact execution_steps_ideal {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
 				e.exec_steps_ideal[idx'] = execute_if_learn[e.exec_steps_ideal[idx],
-																										e.permuted_actions.actions[idx]]
+																										e.executed_actions.actions[idx]]
 			}
 		}
 	}
@@ -138,7 +138,7 @@ fact one_catchall {
 sig Arrival extends Event {
 	packet: one Packet
 } {
-	permuted_actions = get_matching_actions[pre.switch, packet]
+	executed_actions = get_matching_actions[pre.switch, packet]
 }
 
 
