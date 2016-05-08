@@ -280,10 +280,45 @@ assert only_learn_changes {
 
 check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn, 3 Match
 
+assert only_packet_mod_changes {
+	all e : Arrival | {
+		all idx : e.packets.inds - e.packets.lastIdx | {
+			let idx' = add[idx, 1] | {
+				e.packets[idx].match != e.packets[idx'].match implies
+					(e.actions_executed.actions[idx] in PacketMod and
+					 e.packets[idx'].match = (e.actions_executed.actions[idx] <: PacketMod).new_match)
+			}
+		}
+	}
+}
+check only_packet_mod_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, 3 Match
+
 /*
- * TODO
- *   - Assert that resubmit's from is modeled accurately
- */
+	Checks that if there was a rule change, and the match wasn't the initial packet or part of the rule,
+	then
+	the Learn had use_packet = 1 and the new rule's match was part of the match of a PacketMod
+*/
+assert packet_mod_precedes_complicated_learn {
+	all e : Arrival | {
+		all idx : e.packets.inds - e.packets.lastIdx | {
+			let idx' = add[idx, 1] | {
+				(some e.exec_steps[idx'].rules - e.exec_steps[idx].rules and
+				 (e.exec_steps[idx'].rules - e.exec_steps[idx].rules).ActionList !=  
+				 	(e.actions_executed.actions[idx] <: Learn).rule.ActionList and
+				 (e.exec_steps[idx'].rules - e.exec_steps[idx].rules).ActionList != e.packet.match
+				)
+				implies
+				(e.actions_executed.actions[idx] in Learn and 
+				 (e.actions_executed.actions[idx] <: Learn).use_packet = 1 and
+				 some (e.actions_executed.actions.subseq[0, idx].elems & PacketMod) and
+				 (e.exec_steps[idx'].rules - e.exec_steps[idx].rules).ActionList =
+					(e.actions_executed.actions.subseq[0, idx].elems <: PacketMod).new_match
+				)
+			}
+		}
+	}
+}
+check only_packet_mod_changes for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
 
 
 
