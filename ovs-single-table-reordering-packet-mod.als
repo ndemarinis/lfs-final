@@ -168,6 +168,8 @@ fact packet_mod_inorder {
   -- criteria in the PacketMod action becomes the packet's match
   -- criteria in the next execution step
 	all e : Arrival | {
+		modifyPackets[e.packets, e.executed_actions]
+/*
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
 				e.executed_actions.actions[idx] in PacketMod =>
@@ -178,15 +180,19 @@ fact packet_mod_inorder {
 				}
 			}
 		}
+*/
 	}
 
   -- An output action at a given step uses the match criteria
   -- uses the packet for that execution step.
 	all e : Arrival | {
+		doOutput[e.packets, e.executed_actions]
+/*
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			e.executed_actions.actions[idx] in Output =>
 			(e.executed_actions.actions[idx] <: Output).out_packet = e.packets[idx]
 		}
+*/
 	}
 
 }
@@ -197,7 +203,8 @@ fact packet_mod_reordered {
   -- criteria in the PacketMod action becomes the packet's match
   -- criteria in the next execution step
 	all e : Arrival | {
-		all idx : e.permuted_packets.inds - e.permuted_packets.lastIdx | {
+		modifyPackets[e.permuted_packets, e.permuted_actions]
+/*		all idx : e.permuted_packets.inds - e.permuted_packets.lastIdx | {
 			let idx' = add[idx, 1] | {
 				e.permuted_actions.actions[idx] in PacketMod =>
 					e.permuted_packets[idx'].match = (e.permuted_actions.actions[idx] <: PacketMod).new_match 
@@ -207,19 +214,46 @@ fact packet_mod_reordered {
 				}
 			}
 		}
+*/
 	}
 
   -- An output action at a given step uses the match criteria
   -- uses the packet for that execution step.
 	all e : Arrival | {
+		doOutput[e.permuted_packets, e.permuted_actions]
+/*
 		all idx : e.permuted_packets.inds - e.permuted_packets.lastIdx | {
 			e.permuted_actions.actions[idx] in Output =>
 			(e.permuted_actions.actions[idx] <: Output).out_packet = e.permuted_packets[idx]
 		}
+*/
 	}
+
 }
 
+pred modifyPackets[pkts: seq Packet, acts: ActionList] {
+  -- If executing a PacketMod at a given step, the new match
+  -- criteria in the PacketMod action becomes the packet's match
+  -- criteria in the next execution step
+	all idx : pkts.inds - pkts.lastIdx | {
+		let idx' = add[idx, 1] | {
+				acts.actions[idx] in PacketMod =>
+				pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
+			else {
+				--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
+				pkts[idx] = pkts[idx']
+			}
+		}
+	}
 
+}
+
+pred doOutput[pkts: seq Packet, acts: ActionList] {
+	all idx : pkts.inds - pkts.lastIdx | {
+		acts.actions[idx] in Output =>
+			(acts.actions[idx] <: Output).out_packet = pkts[idx]
+	}
+}
 
 -- True if one sequence of actions is a permutation of another
 -- NOTE:  a sequence with no modifications may be considered a
@@ -269,6 +303,12 @@ pred reordering_affects_packets[a: Arrival] {
 	a.packets.last.match != a.permuted_packets.last.match
 }
 
+pred reordering_affects_output[a: Arrival] {
+	let out = a.executed_actions.actions.elems :> Output,
+			out' = a.permuted_actions.actions.elems :> Output | {
+			out = out'
+	}
+}
 
 has_effect_on_switch:
 run { some e: Event |
@@ -277,12 +317,27 @@ run { some e: Event |
 
 
 pred some_diff_packets[] {
-	some a: Arrival |
-		reordering_affects_packets[a]			
+	some a: Arrival | {
+		reordering_affects_packets[a]
+	}
 }
 
 diff_packets:
 run { some_diff_packets } for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival
+
+pred output_is_executed[a: Arrival] {
+	some (a.executed_actions.actions.elems :> Output)
+}
+
+pred showOutputReordering[] {
+	some a: Arrival | {
+		some (a.executed_actions.actions.elems :> PacketMod)
+		and output_is_executed[a]
+		--and reordering_affects_output[a]
+	}
+}
+
+run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival, 10 Output, 10 PacketMod
 
 --
 -- Assertions
