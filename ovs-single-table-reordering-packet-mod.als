@@ -164,71 +164,23 @@ sig Packet {
 
 
 fact packet_mod_inorder {
-  -- If executing a PacketMod at a given step, the new match
-  -- criteria in the PacketMod action becomes the packet's match
-  -- criteria in the next execution step
+
+	-- Define packet modifications and outputs for actions
+	-- executed in order
 	all e : Arrival | {
 		modifyPackets[e.packets, e.executed_actions]
-/*
-		all idx : e.packets.inds - e.packets.lastIdx | {
-			let idx' = add[idx, 1] | {
-				e.executed_actions.actions[idx] in PacketMod =>
-					e.packets[idx'].match = (e.executed_actions.actions[idx] <: PacketMod).new_match 
-				else {
-					--e.packets[idx].match = e.packets[idx'].match
-					e.packets[idx] = e.packets[idx']
-				}
-			}
-		}
-*/
-	}
-
-  -- An output action at a given step uses the match criteria
-  -- uses the packet for that execution step.
-	all e : Arrival | {
 		doOutput[e.packets, e.executed_actions]
-/*
-		all idx : e.packets.inds - e.packets.lastIdx | {
-			e.executed_actions.actions[idx] in Output =>
-			(e.executed_actions.actions[idx] <: Output).out_packet = e.packets[idx]
-		}
-*/
 	}
-
 }
 
-
 fact packet_mod_reordered {
-  -- If executing a PacketMod at a given step, the new match
-  -- criteria in the PacketMod action becomes the packet's match
-  -- criteria in the next execution step
+
+	-- Define packet modifications and outputs for
+	-- permuted actions
 	all e : Arrival | {
 		modifyPackets[e.permuted_packets, e.permuted_actions]
-/*		all idx : e.permuted_packets.inds - e.permuted_packets.lastIdx | {
-			let idx' = add[idx, 1] | {
-				e.permuted_actions.actions[idx] in PacketMod =>
-					e.permuted_packets[idx'].match = (e.permuted_actions.actions[idx] <: PacketMod).new_match 
-				else {
-					--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
-					e.permuted_packets[idx] = e.permuted_packets[idx']
-				}
-			}
-		}
-*/
-	}
-
-  -- An output action at a given step uses the match criteria
-  -- uses the packet for that execution step.
-	all e : Arrival | {
 		doOutput[e.permuted_packets, e.permuted_actions]
-/*
-		all idx : e.permuted_packets.inds - e.permuted_packets.lastIdx | {
-			e.permuted_actions.actions[idx] in Output =>
-			(e.permuted_actions.actions[idx] <: Output).out_packet = e.permuted_packets[idx]
-		}
-*/
 	}
-
 }
 
 pred modifyPackets[pkts: seq Packet, acts: ActionList] {
@@ -249,6 +201,8 @@ pred modifyPackets[pkts: seq Packet, acts: ActionList] {
 }
 
 pred doOutput[pkts: seq Packet, acts: ActionList] {
+  -- An output action at a given step uses the match criteria
+  -- uses the packet for that execution step.
 	all idx : pkts.inds - pkts.lastIdx | {
 		acts.actions[idx] in Output =>
 			(acts.actions[idx] <: Output).out_packet = pkts[idx]
@@ -267,8 +221,6 @@ pred is_permutation[s: seq Action, s': seq Action] {
 	and (all a: s.elems |
 				#(s.indsOf[a]) = #(s'.indsOf[a]))
 }
-
-
 
 
 -- Given a packet, find a match on the given tables
