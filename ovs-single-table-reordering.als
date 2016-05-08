@@ -213,14 +213,15 @@ run { some e: Event |
 -- Arrival$0.permuted_actions.actions) :> Learn).Learn], 
 -- Arrival$0.executed_actions.actions.lastIdx]
 assert reordered_learns_causes_effect {
-	all e: Event, l1, l2: Learn | {
+	all e: Event | /*all disj l1, l2: e.executed_actions.actions.elems |*/ {
 			reordering_has_effect[e] implies
 			let minDiffIdx = min[((e.executed_actions.actions - 
-														e.permuted_actions.actions) :> Learn).Learn] | {
+														e.permuted_actions.actions)).Action] | {
 				let diff = e.executed_actions.actions.subseq[minDiffIdx,
 																						 e.executed_actions.actions.lastIdx] | {
-					l1 in diff[Int] and l2 in diff[Int] and 
-					l1.rule.ActionList = l2.rule.ActionList
+					--l1 in diff[Int] and l2 in diff[Int] and 
+					--l1.rule.ActionList = l2.rule.ActionList
+					#diff != #(diff.elems.rule.ActionList)
 				}
 			}
 	}
