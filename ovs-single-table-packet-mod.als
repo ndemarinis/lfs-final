@@ -127,8 +127,11 @@ fact packet_mod_holds {
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
 				e.actions_executed.actions[idx] in PacketMod =>
-					e.packets[idx'].match = (e.actions_executed.actions[idx] <: PacketMod).new_match else
-					e.packets[idx].match = e.packets[idx'].match
+						e.packets[idx'].match = (e.actions_executed.actions[idx] <: PacketMod).new_match 
+					else { -- If we weren't executing a PacketMod, the packet itself should not change
+						e.packets[idx] = e.packets[idx']
+--					e.packets[idx].match = e.packets[idx'].match
+					}
 			}
 		}
 	}
@@ -143,6 +146,7 @@ fact packet_mod_holds {
 	}
 
 }
+
 
 sig Packet {
 	match: one Match
@@ -208,3 +212,16 @@ assert only_learn_changes {
 }
 
 check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn, 3 Match
+
+
+assert only_packetmod_changes_packet {
+	all a: Arrival | {
+		all idx: a.packets.inds - a.packets.lastIdx | {
+			let idx' = add[idx, 1] | {
+					(a.packets[idx] != a.packets[idx']) implies 
+						(a.actions_executed.actions[idx] in PacketMod)				
+			}
+		}
+	}
+}
+check only_packetmod_changes_packet for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
