@@ -399,6 +399,20 @@ assert reordered_learns_causes_effect {
 }
 check reordered_learns_causes_effect for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
+-- Get the last PacketMod executed before an output action in
+-- a given ActionList
+-- NOTE:  Returns an empty set if the output was not in the ActionList
+fun preceeding_packet_mod[a: Action, acts: ActionList] : (set PacketMod) {
+	a in acts.actions.elems => {
+		let outIdx = acts.actions.idxOf[a] | {
+			let preceeding = acts.actions.subseq[0,outIdx] | {
+				let maxPmIdx = max[(preceeding :> PacketMod).PacketMod] | {
+					preceeding[maxPmIdx]
+				}
+			}
+		}
+	} else none
+}
 
 -- learns_are_swapped: True if l1 precedes l2 in the executed_actions,
 --   but l2 preceeds l1 in the permuted_actions
@@ -561,8 +575,45 @@ assert packet_mod_precedes_complicated_learn {
 }
 check packet_mod_precedes_complicated_learn for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
 
+-- last_packet_mod_affects_learn:
+--   The last packet modification before a learn affects the installed rule after it's executed
+assert last_packet_mod_affects_learn {
+	all e : Event | {
+		all idx : e.executed_actions.actions.inds - e.executed_actions.actions.lastIdx | {
+			let idx' = add[idx, 1] | {
+				let last_pm = preceeding_packet_mod[e.executed_actions.actions[idx], e.executed_actions] | {	
+					(e.executed_actions.actions[idx] in Learn and
+					(e.executed_actions.actions[idx] <: Learn).use_packet = 1)
+					implies
+					(
+					last_pm.new_match->((e.executed_actions.actions[idx] <: Learn).rule[Match]) in e.exec_steps_ideal[idx'].rules
+					)
+				}
+			}
+		}
+	}
+}
+check last_packet_mod_affects_learn for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
 
+-- permuted_packet_mod_and_learn:
+--   If a single learn which uses the current packet has been permuted, and the preceding
+--   PacketMod is different, then the switches which result from the execution of that Learn are different
 
+-- RUNTIME: ~90 seconds
+assert permuted_packet_mod_and_learn {
+	all e : Event | {
+		all learn : (e.executed_actions.actions.elems <: Learn) | {
+			no (e.executed_actions.actions.elems <: PacketMod).new_match & e.packet.match and
+			some PacketMod & e.executed_actions.actions.elems and
+			learn.use_packet = 1 and 
+			e.executed_actions.actions.idxOf[learn] != e.permuted_actions.actions.idxOf[learn] and 
+			preceeding_packet_mod[learn, e.executed_actions].new_match != preceeding_packet_mod[learn, e.permuted_actions].new_match
+			implies
+			e.exec_steps_ideal[ add[e.executed_actions.actions.idxOf[learn], 1] ].rules != e.exec_steps_permuted[ add[e.permuted_actions.actions.idxOf[learn], 1] ].rules
+		}
+	}
+}
+check permuted_packet_mod_and_learn for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
 
 
 
