@@ -87,7 +87,7 @@ abstract sig Event {
 	-- **** Reordering ****
 	-- The matched actions must be a permutation of the actions that are executed
 	is_permutation_weak_output[permuted_actions.actions,
-		      								   executed_actions.actions]
+										   executed_actions.actions]
 
 	-- For now, we can enforce that the permuted actions MUST be reordered
 	permuted_actions.actions != executed_actions.actions
@@ -127,7 +127,7 @@ fact execution_steps_permuted {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
 				e.exec_steps_permuted[idx'] = execute_if_learn[e.exec_steps_permuted[idx],
-	   																							     e.permuted_actions.actions[idx]]
+																								     e.permuted_actions.actions[idx]]
 			}
 		}
 	}
@@ -137,7 +137,7 @@ fact execution_steps_permuted {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
 				e.exec_steps_permuted[idx'] = execute_if_learn_with_packet[e.exec_steps_permuted[idx],
-											  					                                 e.permuted_actions.actions[idx], e.permuted_packets[idx]]
+																				 e.permuted_actions.actions[idx], e.permuted_packets[idx]]
 			}
 		}
 	}
@@ -159,7 +159,7 @@ fact execution_steps_ideal {
 		all idx : e.exec_steps_ideal.inds - e.exec_steps_ideal.lastIdx | {
 			let idx' = add[idx, 1] | {
 				-- Make the switch updates
-				e.exec_steps_ideal[idx'] = execute_if_learn_with_packet[e.exec_steps_ideal[idx], 
+				e.exec_steps_ideal[idx'] = execute_if_learn_with_packet[e.exec_steps_ideal[idx],
 																																e.executed_actions.actions[idx], e.packets[idx]]
 			}
 		}
@@ -190,7 +190,7 @@ fun execute_if_learn[s: Switch, a: Action]: (Switch) {
 -- Given a switch, return another switch with any changes
 -- caused by learn actions, optionally using the fields from the given packet
 fun execute_if_learn_with_packet[s: Switch, a: Action, p: Packet]: (Switch) {
-		{ s2: Switch | { 
+		{ s2: Switch | {
 			a in Learn =>
 				{(a :> Learn).use_packet = 1 =>
 					s2.rules = execute_learn_packet[s, (a :> Learn), p] else
@@ -208,6 +208,8 @@ fun execute_learn[s: Switch, l: Learn] : (Match -> ActionList) {
 		s.rules ++ l.rule
 }
 
+-- Execute a learn action using the match criteria of the given packet
+-- as the match criteria for the installed rule.
 fun execute_learn_packet[s: Switch, l: Learn, p: Packet] : (Match -> ActionList) {
 	s.rules ++ p.match->l.rule[Match]
 }
@@ -251,10 +253,10 @@ pred modifyPackets[pkts: seq Packet, acts: ActionList] {
 				-- 1) The action we're executing is a PacketMod
 				-- 2) The packet's match criteria is different from the one in the PacketMod
 				-- This ensures Packet atoms only change when we actually modify a field.
-				(acts.actions[idx] in PacketMod) && 
+				(acts.actions[idx] in PacketMod) &&
 				((acts.actions[idx] & PacketMod).new_match != pkts[idx].match) => {
-					pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
-				  --pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
+					pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match
+				  --pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match
 			} else {
 				--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
 				pkts[idx] = pkts[idx']
@@ -376,12 +378,12 @@ pred showOutputReordering[] {
 		#(a.executed_actions.actions) = 2 -- Show a minimal example
 		output_is_executed[a]
 		packet_is_modified[a]
-		
+
 		reordering_affects_output[a]
 	}
 }
 
-run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, 
+run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList,
 			exactly 1 Arrival, 0 Learn, 0 Alert, 0 Drop
 
 
@@ -408,25 +410,25 @@ fun preceeding_packet_mod[a: Action, acts: ActionList] : (set PacketMod) {
 --   but l2 preceeds l1 in the permuted_actions
 pred actions_are_swapped[e: Event, a1: Action, a2 : Action] {
 	e.executed_actions.actions.idxOf[a1] > e.executed_actions.actions.idxOf[a2] and
- 	e.permuted_actions.actions.idxOf[a1] < e.permuted_actions.actions.idxOf[a2] 
+	e.permuted_actions.actions.idxOf[a1] < e.permuted_actions.actions.idxOf[a2]
 }
 
 -- ** Assertions on reordering **
 
--- reorder_packet_mod: Constructs a pseudo-bijection. 
+-- reorder_packet_mod: Constructs a pseudo-bijection.
 -- Part 1: If the last packets differ, then there was a swapping of PacketMods
 -- Part 2: If PacketMods were swapped, then the final matches will be different
 
 -- One issue was when the permutation preserved order of PacketMods
 -- (Drop, PM1, PM2) & (PM1, PM2, Drop)
--- Takeaway:  
+-- Takeaway:
 --    1. Permutations that preserve relative ordering of PacketMods
 --       don't affect the final output of the switch, which is good.
 --    2. It would be nice and clean if this were a bijection, but
 --       this is not possible becuase some reorderings may not affect
 --       the final state of the packet.
 assert reorder_packet_mod {
-	all e: Arrival  | { 
+	all e: Arrival  | {
 		-- (1) If the last matches differ, then there was a PacketMod that was swapped
 		reordering_affects_packet_processing[e]
 		implies
@@ -437,7 +439,7 @@ assert reorder_packet_mod {
 
 		-- (2) We can try to write the same assertion in the other direction,
 		-- but we need to account for reorderings that don't affect the final output.
-		-- If there are 2 packet mods, and they're swapped, then the final 
+		-- If there are 2 packet mods, and they're swapped, then the final
 		-- packet values will be different
 		(
 		#(PacketMod & e.executed_actions.actions.elems) > 1 and
@@ -445,9 +447,9 @@ assert reorder_packet_mod {
 			actions_are_swapped[e, pm1, pm2]
 			pm1.new_match != pm2.new_match
 		}
-		  and 
+		  and
 			-- There are no overlapping PacketMods
-			#(e.executed_actions.actions.elems :> PacketMod) = 
+			#(e.executed_actions.actions.elems :> PacketMod) =
 				#((e.executed_actions.actions.elems :> PacketMod).new_match)
 		)
 		implies
@@ -459,9 +461,9 @@ assert reorder_packet_mod {
 check reorder_packet_mod for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 3 Action, 3 PacketMod, 2 Learn
 
 -- reorder_packet_mod_and_learn_without_using_packet:
--- If no learns are using the current packet, and the number of PacketMods 
+-- If no learns are using the current packet, and the number of PacketMods
 --   change before a given Learn and learns don't overwrite each other,
---  then 
+--  then
 --    the final switches won't see an effect
 -- Takeway:  Learn actions that *don't* use packet fields can tolerate reordering with PacketMods.
 assert reorder_packet_mod_and_learn_without_using_packet {
@@ -473,15 +475,15 @@ assert reorder_packet_mod_and_learn_without_using_packet {
 				(
 					-- All learns have unique Matches
 					(no Learn.use_packet & 1) and -- No Learns use_packet
-					#(executed_acts.elems <: Learn) = 
+					#(executed_acts.elems <: Learn) =
 						#(executed_acts.elems <: Learn).rule.ActionList and
 					#(executed_acts.subseq[0, executed_acts.idxOf[learn]][Int] <: PacketMod) !=
-						#(permuted_acts.subseq[0, permuted_acts.idxOf[learn]][Int] <: PacketMod) 
+						#(permuted_acts.subseq[0, permuted_acts.idxOf[learn]][Int] <: PacketMod)
 				)
 				implies
 				(
-					e.exec_steps_permuted.last.rules[learn.rule.ActionList] = 
-						e.exec_steps_ideal.last.rules[learn.rule.ActionList] 
+					e.exec_steps_permuted.last.rules[learn.rule.ActionList] =
+						e.exec_steps_ideal.last.rules[learn.rule.ActionList]
 				)
 			}
 		}
@@ -493,7 +495,7 @@ check reorder_packet_mod_and_learn_without_using_packet for 4 but 4 Int, 5 Switc
 -- permuted_packet_mod_and_learn:
 --   If a single learn which uses the current packet has been permuted, and the preceding
 --   PacketMod is different, then the switches which result from the execution of that Learn are different
--- Takeaway:  A single learn might add a different rule depending on the current state of the packet when 
+-- Takeaway:  A single learn might add a different rule depending on the current state of the packet when
 -- it's executed--if the ordering of PacketMods changes before a learn, it will learn different rules.
 -- RUNTIME: ~90 seconds
 assert permuted_packet_mod_and_learn {
@@ -501,8 +503,8 @@ assert permuted_packet_mod_and_learn {
 		all learn : (e.executed_actions.actions.elems <: Learn) | {
 			no (e.executed_actions.actions.elems <: PacketMod).new_match & e.packet.match and
 			some PacketMod & e.executed_actions.actions.elems and
-			learn.use_packet = 1 and 
-			e.executed_actions.actions.idxOf[learn] != e.permuted_actions.actions.idxOf[learn] and 
+			learn.use_packet = 1 and
+			e.executed_actions.actions.idxOf[learn] != e.permuted_actions.actions.idxOf[learn] and
 			preceeding_packet_mod[learn, e.executed_actions].new_match != preceeding_packet_mod[learn, e.permuted_actions].new_match
 			implies
 			e.exec_steps_ideal[ add[e.executed_actions.actions.idxOf[learn], 1] ].rules != e.exec_steps_permuted[ add[e.permuted_actions.actions.idxOf[learn], 1] ].rules
@@ -517,7 +519,7 @@ check permuted_packet_mod_and_learn for 5 but 5 Int, exactly 1 Arrival, 7 Action
 --  then
 --    There should be no effect on the output action
 -- Takeaway:  For output actions, only the last PacketMod affects the emitted packet--reordering
--- of other PacketMods can be tolerated (so long as they don't affect other actions, as shown by 
+-- of other PacketMods can be tolerated (so long as they don't affect other actions, as shown by
 -- the other assertions)
 assert only_last_packetmod_affects_output {
 	all e: Event | {
@@ -541,10 +543,10 @@ check only_last_packetmod_affects_output for 5 but 5 int, 5 Switch, 7 ActionList
 -- If a reordering of learns had some effect on the
 -- rule tables, there were some number of reordered learns that had
 -- the same match criteria.
--- For all events: 
+-- For all events:
 --  If the reordering affects the rules:
 --    For all disjoint Learns l1 & l2:
---  	  If they are swapped between the regular list and permuted list
+--	  If they are swapped between the regular list and permuted list
 --        and they have the same match, but different action lists
 --      Then
 --        The final steps have different ActionLists for that match
@@ -556,7 +558,7 @@ assert reordered_learns_causes_effect {
 		reordering_affects_rules[e] implies (
 			all disj l1, l2 : Learn | {
 				(
- 				  -- First two values are if there learns are swapped
+				  -- First two values are if there learns are swapped
 				  actions_are_swapped[e, l1, l2] and
 				  l1.rule.ActionList = l2.rule.ActionList and -- Same Match
 				  l1.rule[Match] != l2.rule[Match]  -- Different Lists
@@ -564,24 +566,24 @@ assert reordered_learns_causes_effect {
 				implies
 				(
 					e.exec_steps_ideal.last.rules[l1.rule.ActionList] !=
-						e.exec_steps_permuted.last.rules[l1.rule.ActionList] 
+						e.exec_steps_permuted.last.rules[l1.rule.ActionList]
 				)
-			}		
+			}
 		)
-	} 
+	}
 }
 check reordered_learns_causes_effect for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
 
 
 --
 -- For all events
--- 	For all match
+--	For all match
 --    If last learn with a given match is different and they have different action lists
 --    then
 --      Reordering affects installed rules (without PacketMod)
 --
 -- Takeaway:  If there are multiple learn actions with the same match criteria and different
---           	Action lists, changing the last of those learns to execute for a given match 
+--		Action lists, changing the last of those learns to execute for a given match
 --            will alter the switch rules.
 assert reordered_learns_causes_effect2 {
 	all e: Event | {
@@ -621,7 +623,7 @@ assert last_packet_mod_affects_learn {
 	all e : Event | {
 		all idx : e.executed_actions.actions.inds - e.executed_actions.actions.lastIdx | {
 			let idx' = add[idx, 1] | {
-				let last_pm = preceeding_packet_mod[e.executed_actions.actions[idx], e.executed_actions] | {	
+				let last_pm = preceeding_packet_mod[e.executed_actions.actions[idx], e.executed_actions] | {
 					(e.executed_actions.actions[idx] in Learn and
 					(e.executed_actions.actions[idx] <: Learn).use_packet = 1)
 					implies
@@ -637,7 +639,7 @@ check last_packet_mod_affects_learn for 5 but 5 Int, exactly 1 Arrival, 7 Action
 
 /*
  *	if there was a rule change, and the match wasn't the initial packet or part of the rule,
- * then 
+ * then
  *	the Learn had use_packet = 1 and the new rule's match was part of the match of a PacketMod
  */
 assert packet_mod_precedes_complicated_learn {
@@ -645,12 +647,12 @@ assert packet_mod_precedes_complicated_learn {
 		all idx : e.packets.inds - e.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
 				(some e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules and
-				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList !=  
-				 	(e.executed_actions.actions[idx] <: Learn).rule.ActionList and
+				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList !=
+					(e.executed_actions.actions[idx] <: Learn).rule.ActionList and
 				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList != e.packet.match
 				)
 				implies
-				(e.executed_actions.actions[idx] in Learn and 
+				(e.executed_actions.actions[idx] in Learn and
 				 (e.executed_actions.actions[idx] <: Learn).use_packet = 1 and
 				 some (e.executed_actions.actions.subseq[0, idx].elems & PacketMod) and
 				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList =
@@ -663,7 +665,7 @@ assert packet_mod_precedes_complicated_learn {
 check packet_mod_precedes_complicated_learn for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
 
 
---Only learn actions can change switche rule states
+-- Only learn actions can change switch rule states
 assert only_learn_changes {
 	all e : Event | {
 		all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {
@@ -683,14 +685,13 @@ assert only_packetmod_changes_packet {
 	all a: Arrival | {
 		all idx: a.packets.inds - a.packets.lastIdx | {
 			let idx' = add[idx, 1] | {
-					(a.packets[idx] != a.packets[idx']) implies 
+					(a.packets[idx] != a.packets[idx']) implies
 						(a.executed_actions.actions[idx] in PacketMod)
 
-					(a.permuted_packets[idx] != a.permuted_packets[idx']) implies 
-						(a.permuted_actions.actions[idx] in PacketMod)					
+					(a.permuted_packets[idx] != a.permuted_packets[idx']) implies
+						(a.permuted_actions.actions[idx] in PacketMod)
 			}
 		}
 	}
 }
 check only_packetmod_changes_packet for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
-
