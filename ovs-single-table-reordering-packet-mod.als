@@ -338,9 +338,9 @@ run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList,
 -- Get the last PacketMod executed before an output action in
 -- a given ActionList
 -- NOTE:  Returns an empty set if the output was not in the ActionList
-fun preceeding_packet_mod[o: Output, acts: ActionList] : (set PacketMod) {
-	o in acts.actions.elems => {
-		let outIdx = acts.actions.idxOf[o] | {
+fun preceeding_packet_mod[a: Action, acts: ActionList] : (set PacketMod) {
+	a in acts.actions.elems => {
+		let outIdx = acts.actions.idxOf[a] | {
 			let preceeding = acts.actions.subseq[0,outIdx] | {
 				let maxPmIdx = max[(preceeding :> PacketMod).PacketMod] | {
 					preceeding[maxPmIdx]
