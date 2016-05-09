@@ -480,8 +480,10 @@ assert reorder_packet_mod {
 check reorder_packet_mod for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 3 Action, 3 PacketMod, 2 Learn
 
 -- reorder_packet_mod_and_learn_without_using_packet:
--- If no learns are using the current packet, and the number of PacketMods change before a given Learn,
---   then 
+-- If no learns are using the current packet, and the number of PacketMods 
+--   change before a given Learn and learns don't overwrite each other,
+--  then 
+--    the final switches won't see an effect
 assert reorder_packet_mod_and_learn_without_using_packet {
 	all e : Event | {
 		-- All learns that have been moved
