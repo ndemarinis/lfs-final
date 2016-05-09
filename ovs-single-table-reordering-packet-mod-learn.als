@@ -5,11 +5,12 @@
 --
 
 open util/ordering[Event] as eo
-open util/ternary
 
 sig Switch {
 	rules: Match lone -> ActionList
 } {
+	-- Each switch should have at most one
+	-- of each Match
 	#rules.ActionList = #rules
 }
 
@@ -23,6 +24,10 @@ sig Match {
 }
 
 lone sig CatchallMatch extends Match {}
+
+fact one_catchall {
+	one CatchallMatch
+}
 
 abstract sig Action {
 } {
@@ -53,6 +58,10 @@ sig State {
 	switch: one Switch,
 }
 
+sig Packet {
+	match: one Match
+}
+
 abstract sig Event {
 	pre, post: State,
 
@@ -79,6 +88,24 @@ abstract sig Event {
 
 	-- For now, we can enforce that the actions MUST be reordered
 	permuted_actions.actions != executed_actions.actions
+}
+
+
+sig Arrival extends Event {
+  -- First packet is the one that actually arrives on a switch,
+  -- future packets (with modifications) might ensure that the packet changes
+	packet: Packet,         -- Packet that actually arrives on the switch
+    packets: seq Packet,     -- Packets as modified during execution of non-reordered actions
+	permuted_packets: seq Packet -- Packets as modified using reordered actions
+} {
+	executed_actions = get_matching_actions[pre.switch, packet]
+
+	-- First packet in the sequences is the one arriving on the switch
+	packet = packets[0]
+	packet = permuted_packets[0]
+
+	#packets = add[#(executed_actions.actions.inds), 1]
+	#packets = #permuted_packets
 }
 
 fact transitions {
@@ -172,33 +199,6 @@ fun execute_learn_packet[s: Switch, l: Learn, p: Packet] : (Match -> ActionList)
 	s.rules ++ p.match->l.rule[Match]
 }
 
-fact one_catchall {
-	one CatchallMatch
-}
-
-
-sig Arrival extends Event {
-  -- First packet is the one that actually arrives on a switch,
-  -- future packets (with modifications) might ensure that the packet changes
-	packet: Packet,         -- Packet that actually arrives on the switch
-    packets: seq Packet,     -- Packets as modified during execution of non-reordered actions
-	permuted_packets: seq Packet -- Packets as modified using reordered actions
-} {
-	executed_actions = get_matching_actions[pre.switch, packet]
-
-	-- First packet in the sequences is the one arriving on the switch
-	packet = packets[0]
-	packet = permuted_packets[0]
-
-	#packets = add[#(executed_actions.actions.inds), 1]
-	#packets = #permuted_packets
-}
-
-
-sig Packet {
-	match: one Match
-}
-
 
 fact packet_mod_inorder {
 	-- Define packet modifications and outputs for actions
@@ -231,8 +231,7 @@ pred modifyPackets[pkts: seq Packet, acts: ActionList] {
 				(acts.actions[idx] in PacketMod) && 
 				((acts.actions[idx] & PacketMod).new_match != pkts[idx].match) => {
 					pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
---				acts.actions[idx] in PacketMod =>
-				pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
+				  --pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
 			} else {
 				--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
 				pkts[idx] = pkts[idx']
@@ -408,20 +407,19 @@ assert reorder_packet_mod {
 		-- packet values will be different
 		(
 		#(PacketMod & e.executed_actions.actions.elems) > 1 and
-		all disj pm1, pm2 : PacketMod | {
+		all disj pm1, pm2 : (e.executed_actions.actions.elems :> PacketMod) | {
 			actions_are_swapped[e, pm1, pm2]
-			pm1 in e.executed_actions.actions.elems
-			pm2 in e.executed_actions.actions.elems
 			pm1.new_match != pm2.new_match
 		}
 		  and 
-		all disj pm1, pm2: PacketMod | {
-			pm1 in e.executed_actions.actions.elems
-			pm2 in e.executed_actions.actions.elems
+			-- There are no overlapping PacketMods
+			#(e.executed_actions.actions.elems :> PacketMod) = 
+				#((e.executed_actions.actions.elems :> PacketMod).new_match)
+/*
+		all disj pm1, pm2:  (e.executed_actions.actions.elems :> PacketMod) | {
 			pm1.new_match != pm2.new_match
 		}
-		  
-
+*/
 		)
 		implies
 		(
@@ -527,7 +525,7 @@ check only_last_packetmod_affects_output for 5 but 5 int, 5 Switch, 7 ActionList
 -- e.exec_steps_ideal.last != e.exec_steps_permuted.last
 assert reordered_learns_causes_effect {
 	all e: Event  | {
-		reordering_affects_rules[e] iff (
+		reordering_affects_rules[e] implies (
 			all disj l1, l2 : Learn | {
 				(
  				  -- First two values are if there learns are swapped
@@ -547,15 +545,17 @@ assert reordered_learns_causes_effect {
 check reordered_learns_causes_effect for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
 
 
-/*
- * For all events
- * 	For all match
- *    If last learn with a given match is different and they have different action lists
- *    then
- *      Reordering affects installed rules (without PacketMod)
- */
-
-assert reordered_learns_causes_effect3 {
+--
+-- For all events
+-- 	For all match
+--    If last learn with a given match is different and they have different action lists
+--    then
+--      Reordering affects installed rules (without PacketMod)
+--
+-- Takeaway:  If there are multiple learn actions with the same match criteria and different
+--           	Action lists, changing the last of those learns to execute for a given match 
+--            will alter the switch rules.
+assert reordered_learns_causes_effect2 {
 	all e: Event | {
 		let learns = (e.executed_actions.actions.elems :> Learn),
 				executed_acts = (e.executed_actions.actions),
@@ -565,14 +565,14 @@ assert reordered_learns_causes_effect3 {
 					  lastPermIdx = max[permuted_acts.rule.ActionList.m] | {
 							-- ActionLists must be different
 							executed_acts[lastExecIdx].rule[m] != permuted_acts[lastPermIdx].rule[m]
-							iff
+							implies
 							reordering_affects_rules[e]
 				}
 			}
 		}
 	}
 }
-check reordered_learns_causes_effect3 for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
+check reordered_learns_causes_effect2 for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 4 Learn
 
 
 -- ***** OpenFlow execution assertions *****
