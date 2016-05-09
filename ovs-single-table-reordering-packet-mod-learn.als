@@ -479,6 +479,33 @@ assert reorder_packet_mod {
 }
 check reorder_packet_mod for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 3 Action, 3 PacketMod, 2 Learn
 
+-- reorder_packet_mod_and_learn_without_using_packet:
+-- If no learns are using the current packet, and the number of PacketMods change before a given Learn,
+--   then 
+assert reorder_packet_mod_and_learn_without_using_packet {
+	all e : Event | {
+		-- All learns that have been moved
+		all learn : (e.executed_actions.actions - e.permuted_actions.actions)[Int] <: Learn | {
+			(
+				-- All learns have unique Matches
+				no Learn.use_packet & 1 and -- No Learns use_packet
+				#(e.executed_actions.actions.elems <: Learn) = 
+					#((e.executed_actions.actions.elems <: Learn).rule.ActionList) and
+				#(e.executed_actions.actions.subseq[0, e.executed_actions.actions.idxOf[learn]][Int] <: PacketMod) !=
+					#(e.permuted_actions.actions.subseq[0, e.permuted_actions.actions.idxOf[learn]][Int] <: PacketMod) 
+			)
+			implies
+			(
+				--	exec_steps_permuted: seq Switch,
+                --	exec_steps_ideal: seq Switch,
+				e.exec_steps_permuted.last.rules[learn.rule.ActionList] = 
+					e.exec_steps_ideal.last.rules[learn.rule.ActionList] 
+			)
+		}
+	}
+}
+check reorder_packet_mod_and_learn_without_using_packet for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 3 Action, 3 PacketMod, 3 Learn
+
 -- We need to ensure that only learn actions can change switches
 assert only_learn_changes {
 	all e : Event | {
