@@ -356,7 +356,7 @@ pred actions_are_swapped[e: Event, a1: Action, a2: Action] {
 }
 
 
-/*
+
 -- If we want, we can "canonicalize" our outputs to ensure that no two
 -- output atoms have the packets, which prevents Alloy from generating
 -- different Output atoms for the same packet and match atoms.
@@ -366,7 +366,7 @@ fact canonicalize_outputs {
 		o1.out_packet.match = o2.out_packet.match
 	}
 }
-*/
+
 
 -- Check that only the last PacketMod before an output affects the Output action
 -- if reordering occurred before an output
@@ -384,10 +384,10 @@ assert only_last_packetmod_affects_output {
 					(pm1.new_match = pm2.new_match))
 					implies
 					-- The two output actions should be equal
-					(o1.out_packet.match = o2.out_packet.match)
+					--(o1.out_packet.match = o2.out_packet.match)
 
 					-- If we canonicalize outputs, we can write the following insetad:
-					--(o1.out_packet = o2.out_packet)
+					(o1.out_packet = o2.out_packet)
 				}
 		}
 	}
