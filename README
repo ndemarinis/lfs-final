@@ -1,0 +1,27 @@
+For our final project, we aimed to model an OpenFlow-enabled switch and examine interesting properties of OpenFlow's execution. In particular, we were most interested in understanding the effect of reordering a given action list.
+
+High-Level Description of our Latest Model:
+We've opted to model a single OpenFlow table, wherein the switch's rule table is a relation of Rule->ActionList. The ActionList contains a sequence of Action atoms. The actions we've implemented are: Learn, PacketMod, Drop, Alert, and Output. Once a packet arrives, the matching actions are gathered based on the packet's match criteria and then executed.
+
+Action Behavior:
+Both Drop and Alert are effectively no-ops. 
+In our most comprehensive model, Learn installs a new Match->ActionList onto the current state of the switch. This Match criterion can either be the current packet's value or a preset value.
+PacketMod simply changes the current packet state, this modified packet value can be used for future learns, which is part of the reason reordering is an interesting property to check.
+Output contains the state of the packet when the action was executed, so it is also susceptible to change based on a PacketMod
+
+Model Specifics:
+Our model has two notions of time: successive packet arrivals and the intermediate states of the switch and packet. These intermediate states allow us to create reorderings of actions, and then creates assertions surrounding the original set of actions, and its permutations.
+
+In order permute our actions, each Arrival atom contains both the actions which were executed which come from the matched rule and a “permuted” sequence which contains the same elements, but not in the same order.  This allows us to write assertions which compare the original and permuted orderings.
+
+Assertions:
+We have two categories of assertions: ones which focus on correctness of our Action behavior, and ones which are interested in the re-ordering of actions.
+
+The action-focused properties ensure that only Learn actions can modify the switch and only PacketMod can modify the current state of the packet.
+
+The reordering properties are more complicated. If the final state of the switch is different when executing the original action list, and the permuted action list, then we have a few possibilities: two learns with the same match criteria were swapped, or a PacketMod and Learn were swapped, creating differences in the final rule table.
+
+
+File Development:
+We developed our models by adding more functionality to our model of Open vSwitch, after a given portion of functionality was added, we then proceeded to add assertions regarding reordering for the updated model. This development can be seen in the file: 'LfS Final File Flow Chart.png'
+
