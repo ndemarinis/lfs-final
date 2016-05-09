@@ -164,7 +164,6 @@ sig Packet {
 
 
 fact packet_mod_inorder {
-
 	-- Define packet modifications and outputs for actions
 	-- executed in order
 	all e : Arrival | {
@@ -174,7 +173,6 @@ fact packet_mod_inorder {
 }
 
 fact packet_mod_reordered {
-
 	-- Define packet modifications and outputs for
 	-- permuted actions
 	all e : Arrival | {
@@ -189,9 +187,16 @@ pred modifyPackets[pkts: seq Packet, acts: ActionList] {
   -- criteria in the next execution step
 	all idx : pkts.inds - pkts.lastIdx | {
 		let idx' = add[idx, 1] | {
-				acts.actions[idx] in PacketMod =>
+				-- The next packet's match criteria should change if:
+				-- 1) The action we're executing is a PacketMod
+				-- 2) The packet's match criteria is different from the one in the PacketMod
+				-- This ensures Packet atoms only change when we actually modify a field.
+				(acts.actions[idx] in PacketMod) && 
+				((acts.actions[idx] & PacketMod).new_match != pkts[idx].match) => {
+					pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
+--				acts.actions[idx] in PacketMod =>
 				pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match 
-			else {
+			} else {
 				--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
 				pkts[idx] = pkts[idx']
 			}
@@ -216,20 +221,23 @@ pred doOutput[pkts: seq Packet, acts: ActionList] {
 pred is_permutation[s: seq Action, s': seq Action] {
 	#s = #s'                   -- Size must be the same
 	and s.inds = s'.inds       -- Must have the same indices
-	and s.elems = s'.elems     -- Elements must be the same
+	--and s.elems = s'.elems     -- Elements must be the same
 	-- Finally, the count of each element must be the same
-	and (all a: s.elems |
-				#(s.indsOf[a]) = #(s'.indsOf[a]))
+	--and (all a: s.elems |
+	--			#(s.indsOf[a]) = #(s'.indsOf[a]))
+	#(s.elems :> Output) = #(s'.elems :> Output)
+	#(s.elems :> PacketMod) = #(s'.elems :> PacketMod)
 }
 
 
 -- Given a packet, find a match on the given tables
+/*
 fact force_learn {
 	some e: Event | {
 		e.pre.switch != e.post.switch
 	}
 }
-
+*/
 
 run { } for 5 but 5 Int, 5 Switch
 
@@ -258,7 +266,7 @@ pred reordering_affects_packets[a: Arrival] {
 pred reordering_affects_output[a: Arrival] {
 	let out = a.executed_actions.actions.elems :> Output,
 			out' = a.permuted_actions.actions.elems :> Output | {
-			out = out'
+			out.out_packet != out'.out_packet
 	}
 }
 
@@ -281,15 +289,25 @@ pred output_is_executed[a: Arrival] {
 	some (a.executed_actions.actions.elems :> Output)
 }
 
-pred showOutputReordering[] {
-	some a: Arrival | {
-		some (a.executed_actions.actions.elems :> PacketMod)
-		and output_is_executed[a]
-		--and reordering_affects_output[a]
+pred packet_is_modified[a: Arrival] {
+	some pm: (a.executed_actions.actions.elems :> PacketMod) | {
+		pm.new_match != a.packet.match
 	}
 }
 
-run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival, 10 Output, 10 PacketMod
+pred showOutputReordering[] {
+	some a: Arrival | {
+		some (a.executed_actions.actions.elems :> PacketMod)
+		some (a.executed_actions.actions.elems :> Output)
+		#(a.executed_actions.actions) = 2
+		output_is_executed[a]
+		packet_is_modified[a]
+		
+		reordering_affects_output[a]
+	}
+}
+
+run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Learn, 0 Alert, 0 Drop
 
 --
 -- Assertions
