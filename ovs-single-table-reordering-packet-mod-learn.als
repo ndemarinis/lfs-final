@@ -5,6 +5,7 @@
 --
 
 open util/ordering[Event] as eo
+open util/ternary
 
 sig Switch {
 	rules: Match lone -> ActionList
@@ -299,7 +300,7 @@ run { learn_is_executed } for 5 but 5 Int, 5 Switch
 -- Reordering had some effect on the output if the switch rules were
 -- different at the end of the ideal and permuted execution steps.
 pred reordering_affects_rules[e: Event] {
-	e.exec_steps_ideal.last != e.exec_steps_permuted.last
+	e.exec_steps_ideal.last.rules != e.exec_steps_permuted.last.rules
 }
 
 -- Reordering had some effect the packet if the last packet was different
@@ -435,13 +436,14 @@ check reorder_packet_mod for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arri
 --   change before a given Learn and learns don't overwrite each other,
 --  then 
 --    the final switches won't see an effect
+-- Takeway:  Learn actions that *don't* use packet fields can tolerate reordering with PacketMods.
 assert reorder_packet_mod_and_learn_without_using_packet {
 	all e : Event | {
 		-- All learns that have been moved
 		all learn : (e.executed_actions.actions - e.permuted_actions.actions)[Int] <: Learn | {
 			(
 				-- All learns have unique Matches
-				no Learn.use_packet & 1 and -- No Learns use_packet
+				(no Learn.use_packet & 1) and -- No Learns use_packet
 				#(e.executed_actions.actions.elems <: Learn) = 
 					#((e.executed_actions.actions.elems <: Learn).rule.ActionList) and
 				#(e.executed_actions.actions.subseq[0, e.executed_actions.actions.idxOf[learn]][Int] <: PacketMod) !=
@@ -449,8 +451,6 @@ assert reorder_packet_mod_and_learn_without_using_packet {
 			)
 			implies
 			(
-				--	exec_steps_permuted: seq Switch,
-                --	exec_steps_ideal: seq Switch,
 				e.exec_steps_permuted.last.rules[learn.rule.ActionList] = 
 					e.exec_steps_ideal.last.rules[learn.rule.ActionList] 
 			)
@@ -486,6 +486,9 @@ check permuted_packet_mod_and_learn for 5 but 5 Int, exactly 1 Arrival, 7 Action
 --    and the last PacketMod before an output action is the same,
 --  then
 --    There should be no effect on the output action
+-- Takeaway:  For output actions, only the last PacketMod affects the emitted packet--reordering
+-- of other PacketMods can be tolerated (so long as they don't affect other actions, as shown by 
+-- the other assertions)
 assert only_last_packetmod_affects_output {
 	all e: Event | {
 		all o1, o2: (e.executed_actions.actions.elems :> Output) | {
@@ -521,9 +524,10 @@ check only_last_packetmod_affects_output for 5 but 5 int, 5 Switch, 7 ActionList
 -- Takeaway:  Ordering of learns with the same match criteria must be preserved in order to
 --            not affect the final switch rules.
 -- RUNTIME: Takes about 3 minutes to run
+-- e.exec_steps_ideal.last != e.exec_steps_permuted.last
 assert reordered_learns_causes_effect {
 	all e: Event  | {
-		reordering_affects_rules[e] implies (
+		reordering_affects_rules[e] iff (
 			all disj l1, l2 : Learn | {
 				(
  				  -- First two values are if there learns are swapped
@@ -541,6 +545,34 @@ assert reordered_learns_causes_effect {
 	} 
 }
 check reordered_learns_causes_effect for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
+
+
+/*
+ * For all events
+ * 	For all match
+ *    If last learn with a given match is different and they have different action lists
+ *    then
+ *      Reordering affects installed rules (without PacketMod)
+ */
+
+assert reordered_learns_causes_effect3 {
+	all e: Event | {
+		let learns = (e.executed_actions.actions.elems :> Learn),
+				executed_acts = (e.executed_actions.actions),
+				permuted_acts = (e.permuted_actions.actions) | {
+			all m: learns.rule.ActionList | {
+				let lastExecIdx = max[executed_acts.rule.ActionList.m],
+					  lastPermIdx = max[permuted_acts.rule.ActionList.m] | {
+							-- ActionLists must be different
+							executed_acts[lastExecIdx].rule[m] != permuted_acts[lastPermIdx].rule[m]
+							iff
+							reordering_affects_rules[e]
+				}
+			}
+		}
+	}
+}
+check reordered_learns_causes_effect3 for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
 
 
 -- ***** OpenFlow execution assertions *****
