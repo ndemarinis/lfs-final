@@ -314,6 +314,39 @@ assert reordered_learns_causes_effect {
 check reordered_learns_causes_effect for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
 
+-- For all events: 
+--  If the reordering affects the rules:
+--    For all disjoint Learns l1 & l2:
+--  	  If they are swapped between the regular list and permuted list
+--        and they have the same match, but different action lists
+--      Then
+--        The final steps have different ActionLists for that match
+
+-- RUNTIME: Takes about 2 minutes to run
+assert reordered_learns_causes_effect2 {
+	all e: Event  | {
+		reordering_affects_rules[e] implies (
+			all disj l1, l2 : Learn | {
+				(
+ 				  -- First two values are if there learns are swapped
+				  e.executed_actions.actions.idxOf[l1] > e.executed_actions.actions.idxOf[l2] and
+ 				  e.permuted_actions.actions.idxOf[l1] < e.permuted_actions.actions.idxOf[l2] and
+				  l1.rule.ActionList = l2.rule.ActionList and -- Same Match
+				  l1.rule[Match] != l2.rule[Match]  -- Different Lists
+				)
+				implies
+				(
+					e.exec_steps_ideal.last.rules[l1.rule.ActionList] !=
+						e.exec_steps_permuted.last.rules[l1.rule.ActionList] 
+				)
+			}		
+		)
+	} 
+}
+check reordered_learns_causes_effect2 for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Action, exactly 2 Learn
+
+
+
 -- We need to ensure that only learn actions can change switches
 assert only_learn_changes {
 	all e : Event | {
