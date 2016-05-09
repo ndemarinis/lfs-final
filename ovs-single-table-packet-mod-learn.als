@@ -318,7 +318,7 @@ assert packet_mod_precedes_complicated_learn {
 		}
 	}
 }
-check only_packet_mod_changes for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
+check packet_mod_precedes_complicated_learn for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
 
 
 

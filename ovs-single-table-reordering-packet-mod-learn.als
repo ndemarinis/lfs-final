@@ -538,3 +538,32 @@ assert only_packetmod_changes_packet {
 	}
 }
 check only_packetmod_changes_packet for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
+
+assert packet_mod_precedes_complicated_learn {
+	all e : Arrival | {
+		all idx : e.packets.inds - e.packets.lastIdx | {
+			let idx' = add[idx, 1] | {
+				(some e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules and
+				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList !=  
+				 	(e.executed_actions.actions[idx] <: Learn).rule.ActionList and
+				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList != e.packet.match
+				)
+				implies
+				(e.executed_actions.actions[idx] in Learn and 
+				 (e.executed_actions.actions[idx] <: Learn).use_packet = 1 and
+				 some (e.executed_actions.actions.subseq[0, idx].elems & PacketMod) and
+				 (e.exec_steps_ideal[idx'].rules - e.exec_steps_ideal[idx].rules).ActionList =
+					(e.executed_actions.actions.subseq[0, idx].elems <: PacketMod).new_match
+				)
+			}
+		}
+	}
+}
+check packet_mod_precedes_complicated_learn for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 PacketMod, exactly 1 Learn, 3 Match
+
+
+
+
+
+
+
