@@ -258,7 +258,6 @@ pred learn_is_executed {
 	}
 }
 
-
 run { learn_is_executed } for 5 but 5 Int, 5 Switch
 
 -- Generate an instance in which we have action lists of different sizes
@@ -323,7 +322,7 @@ pred showOutputReordering[] {
 	some a: Arrival | {
 		some (a.executed_actions.actions.elems :> PacketMod)
 		some (a.executed_actions.actions.elems :> Output)
-		#(a.executed_actions.actions) = 2 -- Show a minimal example
+		--#(a.executed_actions.actions) = 2 -- Show a minimal example
 		output_is_executed[a]
 		packet_is_modified[a]
 		
@@ -333,6 +332,68 @@ pred showOutputReordering[] {
 
 run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, 
 			exactly 1 Arrival, 0 Learn, 0 Alert, 0 Drop
+
+
+
+-- Get the last PacketMod executed before an output action in
+-- a given ActionList
+-- NOTE:  Returns an empty set if the output was not in the ActionList
+fun preceeding_packet_mod[o: Output, acts: ActionList] : (set PacketMod) {
+	o in acts.actions.elems => {
+		let outIdx = acts.actions.idxOf[o] | {
+			let preceeding = acts.actions.subseq[0,outIdx] | {
+				let maxPmIdx = max[(preceeding :> PacketMod).PacketMod] | {
+					preceeding[maxPmIdx]
+				}
+			}
+		}
+	} else none
+}
+
+pred actions_are_swapped[e: Event, a1: Action, a2: Action] {
+	e.executed_actions.actions.idxOf[a1] > e.executed_actions.actions.idxOf[a2] and
+ 	e.permuted_actions.actions.idxOf[a1] < e.permuted_actions.actions.idxOf[a2]
+}
+
+
+/*
+-- If we want, we can "canonicalize" our outputs to ensure that no two
+-- output atoms have the packets, which prevents Alloy from generating
+-- different Output atoms for the same packet and match atoms.
+fact canonicalize_outputs {
+	no disj o1, o2: Output | {
+		--o1.out_packet = o2.out_packet
+		o1.out_packet.match = o2.out_packet.match
+	}
+}
+*/
+
+-- Check that only the last PacketMod before an output affects the Output action
+-- if reordering occurred before an output
+--    and the last PacketMod before an output action is the same,
+--  then
+--    There should be no effect on the output action
+assert only_last_packetmod_affects_output {
+	all e: Event | {
+		all o1, o2: (e.executed_actions.actions.elems :> Output) | {
+				let pm1 = preceeding_packet_mod[o1, e.executed_actions],
+						pm2 = preceeding_packet_mod[o2, e.permuted_actions] | {
+					-- If two output actions are swapped, but their
+					-- immediately preceeding PacketMods are the same...
+					(actions_are_swapped[e, o1, o2] and
+					(pm1.new_match = pm2.new_match))
+					implies
+					-- The two output actions should be equal
+					(o1.out_packet.match = o2.out_packet.match)
+
+					-- If we canonicalize outputs, we can write the following insetad:
+					--(o1.out_packet = o2.out_packet)
+				}
+		}
+	}
+}
+check only_last_packetmod_affects_output for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival
+
 
 --
 -- Assertions
