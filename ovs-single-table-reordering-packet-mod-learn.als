@@ -238,7 +238,6 @@ fact packet_mod_reordered {
 -- different Output atoms for the same packet and match atoms.
 fact canonicalize_outputs {
 	no disj o1, o2: Output | {
-		--o1.out_packet = o2.out_packet
 		o1.out_packet.match = o2.out_packet.match
 	}
 }
@@ -256,9 +255,7 @@ pred modifyPackets[pkts: seq Packet, acts: ActionList] {
 				(acts.actions[idx] in PacketMod) &&
 				((acts.actions[idx] & PacketMod).new_match != pkts[idx].match) => {
 					pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match
-				  --pkts[idx'].match = (acts.actions[idx] <: PacketMod).new_match
 			} else {
-				--e.permuted_packets[idx].match = e.permuted_packets[idx'].match
 				pkts[idx] = pkts[idx']
 			}
 		}
@@ -406,8 +403,8 @@ fun preceeding_packet_mod[a: Action, acts: ActionList] : (set PacketMod) {
 	} else none
 }
 
--- learns_are_swapped: True if l1 precedes l2 in the executed_actions,
---   but l2 preceeds l1 in the permuted_actions
+-- actions_are_swapped: True if a1 precedes a2 in the executed_actions,
+--   but a2 preceeds a1 in the permuted_actions
 pred actions_are_swapped[e: Event, a1: Action, a2 : Action] {
 	e.executed_actions.actions.idxOf[a1] > e.executed_actions.actions.idxOf[a2] and
 	e.permuted_actions.actions.idxOf[a1] < e.permuted_actions.actions.idxOf[a2]
@@ -637,11 +634,11 @@ assert last_packet_mod_affects_learn {
 }
 check last_packet_mod_affects_learn for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
 
-/*
- *	if there was a rule change, and the match wasn't the initial packet or part of the rule,
- * then
- *	the Learn had use_packet = 1 and the new rule's match was part of the match of a PacketMod
- */
+--
+--	if there was a rule change, and the match wasn't the initial packet or part of the rule,
+-- then
+--	the Learn had use_packet = 1 and the new rule's match was part of the match of a PacketMod
+--
 assert packet_mod_precedes_complicated_learn {
 	all e : Arrival | {
 		all idx : e.packets.inds - e.packets.lastIdx | {
