@@ -251,15 +251,15 @@ pred is_permutation_weak_output[s: seq Action, s': seq Action] {
 }
 
 -- Given a packet, find a match on the given tables
-/*
-fact force_learn {
+
+pred learn_is_executed {
 	some e: Event | {
 		e.pre.switch != e.post.switch
 	}
 }
-*/
 
-run { } for 5 but 5 Int, 5 Switch
+
+run { learn_is_executed } for 5 but 5 Int, 5 Switch
 
 -- Generate an instance in which we have action lists of different sizes
 pred some_diff_actionlists[] {
@@ -292,7 +292,8 @@ pred reordering_affects_output[a: Arrival] {
 }
 
 reordering_affects_rules:
-run { some e: Event |
+run { learn_is_executed &&
+			some e: Event |
 				reordering_affects_rules[e]
 } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival
 
