@@ -1,0 +1,235 @@
+<alloy builddate="2012-09-25 15:54 EDT">
+
+<instance bitwidth="5" maxseq="5" command="Run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival, 0 Learn, 0 Alert, 0 Drop" filename="/home/deemer/Development/lfs-final/ovs-single-table-reordering-packet-mod.als">
+
+<sig label="seq/Int" ID="0" parentID="1" builtin="yes">
+</sig>
+
+<sig label="Int" ID="1" parentID="2" builtin="yes">
+</sig>
+
+<sig label="String" ID="3" parentID="2" builtin="yes">
+</sig>
+
+<sig label="this/Switch" ID="4" parentID="2">
+   <atom label="Switch$0"/>
+   <atom label="Switch$1"/>
+   <atom label="Switch$2"/>
+</sig>
+
+<field label="rules" ID="5" parentID="4">
+   <tuple> <atom label="Switch$0"/> <atom label="Match$0"/> <atom label="ActionList$6"/> </tuple>
+   <tuple> <atom label="Switch$1"/> <atom label="Match$0"/> <atom label="ActionList$6"/> </tuple>
+   <tuple> <atom label="Switch$1"/> <atom label="CatchallMatch$0"/> <atom label="ActionList$5"/> </tuple>
+   <tuple> <atom label="Switch$2"/> <atom label="Match$1"/> <atom label="ActionList$6"/> </tuple>
+   <types> <type ID="4"/> <type ID="6"/> <type ID="7"/> </types>
+</field>
+
+<sig label="this/ActionList" ID="7" parentID="2">
+   <atom label="ActionList$0"/>
+   <atom label="ActionList$1"/>
+   <atom label="ActionList$2"/>
+   <atom label="ActionList$3"/>
+   <atom label="ActionList$4"/>
+   <atom label="ActionList$5"/>
+   <atom label="ActionList$6"/>
+</sig>
+
+<field label="actions" ID="8" parentID="7">
+   <tuple> <atom label="ActionList$0"/> <atom label="0"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$0"/> <atom label="1"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$0"/> <atom label="2"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$0"/> <atom label="3"/> <atom label="Output$2"/> </tuple>
+   <tuple> <atom label="ActionList$1"/> <atom label="0"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$1"/> <atom label="1"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$2"/> <atom label="0"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$2"/> <atom label="1"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$2"/> <atom label="2"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$2"/> <atom label="3"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$3"/> <atom label="0"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$3"/> <atom label="1"/> <atom label="Output$1"/> </tuple>
+   <tuple> <atom label="ActionList$3"/> <atom label="2"/> <atom label="Output$1"/> </tuple>
+   <tuple> <atom label="ActionList$3"/> <atom label="3"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$3"/> <atom label="4"/> <atom label="Output$3"/> </tuple>
+   <tuple> <atom label="ActionList$4"/> <atom label="0"/> <atom label="Output$2"/> </tuple>
+   <tuple> <atom label="ActionList$4"/> <atom label="1"/> <atom label="Output$1"/> </tuple>
+   <tuple> <atom label="ActionList$4"/> <atom label="2"/> <atom label="Output$1"/> </tuple>
+   <tuple> <atom label="ActionList$4"/> <atom label="3"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$4"/> <atom label="4"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$5"/> <atom label="0"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$5"/> <atom label="1"/> <atom label="Output$0"/> </tuple>
+   <tuple> <atom label="ActionList$6"/> <atom label="0"/> <atom label="PacketMod$0"/> </tuple>
+   <tuple> <atom label="ActionList$6"/> <atom label="1"/> <atom label="Output$1"/> </tuple>
+   <types> <type ID="7"/> <type ID="0"/> <type ID="9"/> </types>
+</field>
+
+<sig label="this/CatchallMatch" ID="10" parentID="6" lone="yes">
+   <atom label="CatchallMatch$0"/>
+</sig>
+
+<sig label="this/Match" ID="6" parentID="2">
+   <atom label="Match$0"/>
+   <atom label="Match$1"/>
+</sig>
+
+<sig label="this/Learn" ID="11" parentID="9">
+</sig>
+
+<field label="rule" ID="12" parentID="11">
+   <types> <type ID="11"/> <type ID="6"/> <type ID="7"/> </types>
+</field>
+
+<sig label="this/Output" ID="13" parentID="9">
+   <atom label="Output$0"/>
+   <atom label="Output$1"/>
+   <atom label="Output$2"/>
+   <atom label="Output$3"/>
+</sig>
+
+<field label="out_packet" ID="14" parentID="13">
+   <tuple> <atom label="Output$0"/> <atom label="Packet$1"/> </tuple>
+   <tuple> <atom label="Output$1"/> <atom label="Packet$0"/> </tuple>
+   <tuple> <atom label="Output$2"/> <atom label="Packet$0"/> </tuple>
+   <tuple> <atom label="Output$3"/> <atom label="Packet$0"/> </tuple>
+   <types> <type ID="13"/> <type ID="15"/> </types>
+</field>
+
+<sig label="this/Drop" ID="16" parentID="9">
+</sig>
+
+<sig label="this/Alert" ID="17" parentID="9">
+</sig>
+
+<sig label="this/PacketMod" ID="18" parentID="9">
+   <atom label="PacketMod$0"/>
+</sig>
+
+<field label="new_match" ID="19" parentID="18">
+   <tuple> <atom label="PacketMod$0"/> <atom label="Match$1"/> </tuple>
+   <types> <type ID="18"/> <type ID="6"/> </types>
+</field>
+
+<sig label="this/Action" ID="9" parentID="2" abstract="yes">
+</sig>
+
+<sig label="this/State" ID="20" parentID="2">
+   <atom label="State$0"/>
+   <atom label="State$1"/>
+</sig>
+
+<field label="switch" ID="21" parentID="20">
+   <tuple> <atom label="State$0"/> <atom label="Switch$2"/> </tuple>
+   <tuple> <atom label="State$1"/> <atom label="Switch$1"/> </tuple>
+   <types> <type ID="20"/> <type ID="4"/> </types>
+</field>
+
+<sig label="this/Arrival" ID="22" parentID="23">
+   <atom label="Arrival$0"/>
+</sig>
+
+<field label="packet" ID="24" parentID="22">
+   <tuple> <atom label="Arrival$0"/> <atom label="Packet$2"/> </tuple>
+   <types> <type ID="23"/> <type ID="15"/> </types>
+</field>
+
+<field label="packets" ID="25" parentID="22">
+   <tuple> <atom label="Arrival$0"/> <atom label="0"/> <atom label="Packet$2"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="1"/> <atom label="Packet$0"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="2"/> <atom label="Packet$0"/> </tuple>
+   <types> <type ID="23"/> <type ID="0"/> <type ID="15"/> </types>
+</field>
+
+<field label="permuted_packets" ID="26" parentID="22">
+   <tuple> <atom label="Arrival$0"/> <atom label="0"/> <atom label="Packet$2"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="1"/> <atom label="Packet$1"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="2"/> <atom label="Packet$1"/> </tuple>
+   <types> <type ID="23"/> <type ID="0"/> <type ID="15"/> </types>
+</field>
+
+<sig label="this/Event" ID="23" parentID="2" abstract="yes">
+</sig>
+
+<field label="pre" ID="27" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="State$1"/> </tuple>
+   <types> <type ID="23"/> <type ID="20"/> </types>
+</field>
+
+<field label="post" ID="28" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="State$1"/> </tuple>
+   <types> <type ID="23"/> <type ID="20"/> </types>
+</field>
+
+<field label="exec_steps_permuted" ID="29" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="0"/> <atom label="Switch$1"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="1"/> <atom label="Switch$1"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="2"/> <atom label="Switch$1"/> </tuple>
+   <types> <type ID="23"/> <type ID="0"/> <type ID="4"/> </types>
+</field>
+
+<field label="exec_steps_ideal" ID="30" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="0"/> <atom label="Switch$1"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="1"/> <atom label="Switch$1"/> </tuple>
+   <tuple> <atom label="Arrival$0"/> <atom label="2"/> <atom label="Switch$1"/> </tuple>
+   <types> <type ID="23"/> <type ID="0"/> <type ID="4"/> </types>
+</field>
+
+<field label="permuted_actions" ID="31" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="ActionList$5"/> </tuple>
+   <types> <type ID="23"/> <type ID="7"/> </types>
+</field>
+
+<field label="executed_actions" ID="32" parentID="23">
+   <tuple> <atom label="Arrival$0"/> <atom label="ActionList$6"/> </tuple>
+   <types> <type ID="23"/> <type ID="7"/> </types>
+</field>
+
+<sig label="this/Packet" ID="15" parentID="2">
+   <atom label="Packet$0"/>
+   <atom label="Packet$1"/>
+   <atom label="Packet$2"/>
+</sig>
+
+<field label="match" ID="33" parentID="15">
+   <tuple> <atom label="Packet$0"/> <atom label="Match$1"/> </tuple>
+   <tuple> <atom label="Packet$1"/> <atom label="Match$1"/> </tuple>
+   <tuple> <atom label="Packet$2"/> <atom label="Match$0"/> </tuple>
+   <types> <type ID="15"/> <type ID="6"/> </types>
+</field>
+
+<sig label="eo/Ord" ID="34" parentID="2" one="yes" private="yes">
+   <atom label="eo/Ord$0"/>
+</sig>
+
+<field label="First" ID="35" parentID="34" private="yes">
+   <tuple> <atom label="eo/Ord$0"/> <atom label="Arrival$0"/> </tuple>
+   <types> <type ID="34"/> <type ID="23"/> </types>
+</field>
+
+<field label="Next" ID="36" parentID="34" private="yes">
+   <types> <type ID="34"/> <type ID="23"/> <type ID="23"/> </types>
+</field>
+
+<sig label="univ" ID="2" builtin="yes">
+</sig>
+
+<skolem label="$showOutputReordering_a" ID="37">
+   <tuple> <atom label="Arrival$0"/> </tuple>
+   <types> <type ID="23"/> </types>
+</skolem>
+
+<skolem label="$packet_is_modified_pm" ID="38">
+   <tuple> <atom label="PacketMod$0"/> </tuple>
+   <types> <type ID="18"/> </types>
+</skolem>
+
+</instance>
+
+<source filename="/home/deemer/Development/lfs-final/ovs-single-table-reordering-packet-mod.als" content="--&#x000a;-- ovs-single-table-reordering-packet-mod.als&#x000a;-- Single rule table with reordering of actions executed for a given&#x000a;-- packet arrival.&#x000a;--&#x000a;&#x000a;open util/ordering[Event] as eo&#x000a;&#x000a;sig Switch {&#x000a;&#x0009;rules: Match lone -&gt; ActionList&#x000a;} {&#x000a;&#x0009;#rules.ActionList = #rules&#x000a;}&#x000a;&#x000a;sig ActionList {&#x000a;&#x0009;actions: seq Action&#x000a;} {&#x000a;&#x0009;&#x0009;some actions&#x000a;}&#x000a;&#x000a;sig Match {&#x000a;}&#x000a;&#x000a;lone sig CatchallMatch extends Match {}&#x000a;&#x000a;abstract sig Action {&#x000a;} {&#x000a;  Action in ActionList.actions.elems&#x000a;}&#x000a;&#x000a;sig Learn extends Action {&#x000a;&#x0009;rule: Match lone -&gt; ActionList&#x000a;} {&#x000a;&#x0009;one rule&#x000a;}&#x000a;&#x000a;sig Output extends Action {&#x000a;&#x0009;out_packet : one Packet&#x000a;}&#x000a;&#x000a;sig Drop extends Action {}&#x000a;sig Alert extends Action {}&#x000a;&#x000a;sig PacketMod extends Action {&#x000a;&#x0009;new_match: one Match&#x000a;}&#x000a;&#x000a;sig State {&#x000a;&#x0009;switch: one Switch,&#x000a;}&#x000a;&#x000a;abstract sig Event {&#x000a;&#x0009;pre, post: State,&#x000a;&#x000a;&#x0009;exec_steps_permuted: seq Switch,&#x000a;&#x0009;exec_steps_ideal: seq Switch,&#x000a;&#x0009;permuted_actions: ActionList,&#x000a;&#x0009;executed_actions: ActionList,&#x000a;&#x000a;} {&#x000a;&#x0009;#(exec_steps_permuted.inds) = add[#(permuted_actions.actions), 1]&#x000a;&#x000a;&#x0009;#exec_steps_ideal = #exec_steps_permuted&#x000a;&#x000a;&#x0009;exec_steps_permuted.first = pre.switch&#x000a;&#x0009;exec_steps_ideal.first = pre.switch&#x000a;&#x000a;&#x0009;exec_steps_ideal.last = post.switch&#x000a;&#x000a;&#x000a;&#x0009;-- **** Reordering ****&#x000a;&#x0009;-- The matched actions must be a permutation of the actions that are executed&#x000a;&#x0009;is_permutation_weak_output[permuted_actions.actions,&#x000a;&#x0009;&#x0009;      &#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;   executed_actions.actions]&#x000a;&#x000a;&#x0009;-- For now, we can enforce that the actions MUST be reordered&#x000a;&#x0009;permuted_actions.actions != executed_actions.actions&#x000a;}&#x000a;&#x000a;fact transitions {&#x000a;&#x0009;all e: Event - eo/last | {&#x000a;&#x0009;&#x0009;let eNext = e.next | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;e.post = eNext.pre&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;&#x000a; -- Execution steps with possible reordering&#x000a;fact execution_steps_permuted {&#x000a;&#x0009;all e : Event | {&#x000a;&#x0009;&#x0009;all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {&#x000a;&#x0009;&#x0009;&#x0009;let idx&apos; = add[idx, 1] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- Make the switch updates&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;e.exec_steps_permuted[idx&apos;] = execute_if_learn[e.exec_steps_permuted[idx],&#x000a;&#x0009;   &#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;     e.permuted_actions.actions[idx]]&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;fact execution_steps_ideal {&#x000a;&#x0009;all e : Event | {&#x000a;&#x0009;&#x0009;all idx : e.exec_steps_ideal.inds - e.exec_steps_ideal.lastIdx | {&#x000a;&#x0009;&#x0009;&#x0009;let idx&apos; = add[idx, 1] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- Make the switch updates&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;e.exec_steps_ideal[idx&apos;] = execute_if_learn[e.exec_steps_ideal[idx],&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;e.executed_actions.actions[idx]]&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;fun get_matching_actions[s: Switch, p: Packet] : (ActionList) {&#x000a;&#x0009;&#x0009;(p.match in s.rules.ActionList) =&gt;&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;s.rules[p.match]&#x000a;&#x0009;&#x0009;else { -- Table miss&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;s.rules[CatchallMatch]&#x000a;&#x0009;&#x0009;}&#x000a;}&#x000a;&#x000a;&#x000a;fun execute_if_learn[s: Switch, a: Action]: (Switch) {&#x000a;&#x0009;&#x0009;{ s2: Switch | {&#x000a;&#x0009;&#x0009;&#x0009;a in Learn =&gt;&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;s2.rules = execute_learn[s, (a :&gt; Learn)] else&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;s2.rules = s.rules&#x000a;&#x0009;&#x0009;}}&#x000a;}&#x000a;&#x000a;&#x000a;fun execute_learn[s: Switch, l: Learn] : (Match -&gt; ActionList) {&#x000a;&#x0009;&#x0009;s.rules ++ l.rule&#x000a;}&#x000a;&#x000a;&#x000a;&#x000a;fact one_catchall {&#x000a;&#x0009;one CatchallMatch&#x000a;}&#x000a;&#x000a;&#x000a;sig Arrival extends Event {&#x000a;  -- First packet is the one that actually arrives on a switch,&#x000a;  -- future packets (with modifications) might ensure that the packet changes&#x000a;&#x0009;packet: Packet,         -- Packet that actually arrives on the switch&#x000a;  packets: seq Packet,     -- Packets as modified during execution of non-reordered actions&#x000a;&#x0009;permuted_packets: seq Packet -- Packets as modified using reordered actions&#x000a;} {&#x000a;&#x0009;executed_actions = get_matching_actions[pre.switch, packet]&#x000a;&#x000a;&#x0009;-- First packet in the sequences is the one arriving on the switch&#x000a;&#x0009;packet = packets[0]&#x000a;&#x0009;packet = permuted_packets[0]&#x000a;&#x000a;&#x0009;#packets = add[#(executed_actions.actions.inds), 1]&#x000a;&#x0009;#packets = #permuted_packets&#x000a;}&#x000a;&#x000a;&#x000a;sig Packet {&#x000a;&#x0009;match: one Match&#x000a;}&#x000a;&#x000a;&#x000a;fact packet_mod_inorder {&#x000a;&#x0009;-- Define packet modifications and outputs for actions&#x000a;&#x0009;-- executed in order&#x000a;&#x0009;all e : Arrival | {&#x000a;&#x0009;&#x0009;modifyPackets[e.packets, e.executed_actions]&#x000a;&#x0009;&#x0009;doOutput[e.packets, e.executed_actions]&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;fact packet_mod_reordered {&#x000a;&#x0009;-- Define packet modifications and outputs for&#x000a;&#x0009;-- permuted actions&#x000a;&#x0009;all e : Arrival | {&#x000a;&#x0009;&#x0009;modifyPackets[e.permuted_packets, e.permuted_actions]&#x000a;&#x0009;&#x0009;doOutput[e.permuted_packets, e.permuted_actions]&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;pred modifyPackets[pkts: seq Packet, acts: ActionList] {&#x000a;  -- If executing a PacketMod at a given step, the new match&#x000a;  -- criteria in the PacketMod action becomes the packet&apos;s match&#x000a;  -- criteria in the next execution step&#x000a;&#x0009;all idx : pkts.inds - pkts.lastIdx | {&#x000a;&#x0009;&#x0009;let idx&apos; = add[idx, 1] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- The next packet&apos;s match criteria should change if:&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- 1) The action we&apos;re executing is a PacketMod&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- 2) The packet&apos;s match criteria is different from the one in the PacketMod&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;-- This ensures Packet atoms only change when we actually modify a field.&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;(acts.actions[idx] in PacketMod) &amp;&amp; &#x000a;&#x0009;&#x0009;&#x0009;&#x0009;((acts.actions[idx] &amp; PacketMod).new_match != pkts[idx].match) =&gt; {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;pkts[idx&apos;].match = (acts.actions[idx] &lt;: PacketMod).new_match &#x000a;--&#x0009;&#x0009;&#x0009;&#x0009;acts.actions[idx] in PacketMod =&gt;&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;pkts[idx&apos;].match = (acts.actions[idx] &lt;: PacketMod).new_match &#x000a;&#x0009;&#x0009;&#x0009;} else {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;--e.permuted_packets[idx].match = e.permuted_packets[idx&apos;].match&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;pkts[idx] = pkts[idx&apos;]&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;&#x000a;}&#x000a;&#x000a;pred doOutput[pkts: seq Packet, acts: ActionList] {&#x000a;  -- An output action at a given step uses the match criteria&#x000a;  -- uses the packet for that execution step.&#x000a;&#x0009;all idx : pkts.inds - pkts.lastIdx | {&#x000a;&#x0009;&#x0009;acts.actions[idx] in Output =&gt;&#x000a;&#x0009;&#x0009;&#x0009;(acts.actions[idx] &lt;: Output).out_packet = pkts[idx]&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;-- True if one sequence of actions is a permutation of another&#x000a;-- NOTE:  a sequence with no modifications may be considered a&#x000a;-- permutation of itself.  This is by design (and can be restricted&#x000a;-- elsewhere in the model if needed.)&#x000a;pred is_permutation[s: seq Action, s&apos;: seq Action] {&#x000a;&#x0009;#s = #s&apos;                   -- Size must be the same&#x000a;&#x0009;and s.inds = s&apos;.inds       -- Must have the same indices&#x000a;&#x0009;and s.elems = s&apos;.elems     -- Elements must be the same&#x000a;&#x0009;-- Finally, the count of each element must be the same&#x000a;&#x0009;and (all a: s.elems |&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;#(s.indsOf[a]) = #(s&apos;.indsOf[a]))&#x000a;}&#x000a;&#x000a;-- True if one sequence of actions is a permutation of another,&#x000a;-- all elements in both sequences must be the same EXCEPT for outputs,&#x000a;-- which may be different atoms if they get reordered.&#x000a;pred is_permutation_weak_output[s: seq Action, s&apos;: seq Action] {&#x000a;&#x0009;#s = #s&apos;                   -- Size must be the same&#x000a;&#x0009;and s.inds = s&apos;.inds       -- Must have the same indices&#x000a;&#x000a;&#x0009;-- Elements must be the same, except outputs&#x000a;&#x0009;and (s.elems - Output) = (s&apos;.elems - Output)&#x000a;&#x0009;-- The count of each element must be the same&#x000a;&#x0009;and (all a: (s.elems - Output) |&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;#(s.indsOf[a]) = #(s&apos;.indsOf[a]))&#x000a;&#x000a;&#x0009;-- Finally, since we can&apos;t use the above assertion on&#x000a;&#x0009;-- outputs, just assert that the number of outputs must&#x000a;&#x0009;-- be the same.  This allows the individual Output atoms&#x000a;&#x0009;-- to change, while keeping the same number of them&#x000a;&#x0009;-- Technically, this means that alloy can nondeterministicly pick&#x000a;&#x0009;-- which outputs to use, but we enforce which outs belong here&#x000a;&#x0009;-- with doOutput&#x000a;&#x0009;#(s.elems :&gt; Output) = #(s&apos;.elems :&gt; Output)&#x000a;}&#x000a;&#x000a;-- Given a packet, find a match on the given tables&#x000a;/*&#x000a;fact force_learn {&#x000a;&#x0009;some e: Event | {&#x000a;&#x0009;&#x0009;e.pre.switch != e.post.switch&#x000a;&#x0009;}&#x000a;}&#x000a;*/&#x000a;&#x000a;run { } for 5 but 5 Int, 5 Switch&#x000a;&#x000a;-- Generate an instance in which we have action lists of different sizes&#x000a;pred some_diff_actionlists[] {&#x000a;&#x0009;&#x0009;some a1, a2: ActionList | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;#a1.actions != #a2.actions&#x000a;&#x0009;&#x0009;}&#x000a;}&#x000a;&#x000a;diff_actionlists:&#x000a;run { some_diff_actionlists } for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival&#x000a;&#x000a;-- Reordering had some effect on the output if the switch rules were&#x000a;-- different at the end of the ideal and permuted execution steps.&#x000a;pred reordering_affects_rules[e: Event] {&#x000a;&#x0009;e.exec_steps_ideal.last != e.exec_steps_permuted.last&#x000a;}&#x000a;&#x000a;-- Reordering had some effect the packet if the last packet was different&#x000a;pred reordering_affects_packet_processing[a: Arrival] {&#x000a;&#x0009;a.packets.last.match != a.permuted_packets.last.match&#x000a;}&#x000a;&#x000a;-- Reordering affected packets generated by output actions if&#x000a;-- the packets included in the output actions are different&#x000a;pred reordering_affects_output[a: Arrival] {&#x000a;&#x0009;let out = a.executed_actions.actions.elems :&gt; Output,&#x000a;&#x0009;&#x0009;&#x0009;out&apos; = a.permuted_actions.actions.elems :&gt; Output | {&#x000a;&#x0009;&#x0009;&#x0009;out.out_packet != out&apos;.out_packet&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;reordering_affects_rules:&#x000a;run { some e: Event |&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;reordering_affects_rules[e]&#x000a;} for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival&#x000a;&#x000a;&#x000a;-- Show an example where some packets have changed&#x000a;pred some_diff_packets[] {&#x000a;&#x0009;some a: Arrival | {&#x000a;&#x0009;&#x0009;reordering_affects_packet_processing[a]&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;diff_packets:&#x000a;run { some_diff_packets } for 5 but 5 int, 5 Switch, 7 ActionList, exactly 1 Arrival&#x000a;&#x000a;pred output_is_executed[a: Arrival] {&#x000a;&#x0009;some (a.executed_actions.actions.elems :&gt; Output)&#x000a;}&#x000a;&#x000a;pred packet_is_modified[a: Arrival] {&#x000a;&#x0009;some pm: (a.executed_actions.actions.elems :&gt; PacketMod) | {&#x000a;&#x0009;&#x0009;pm.new_match != a.packet.match&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;-- Show an example where reordering causes different outputs&#x000a;pred showOutputReordering[] {&#x000a;&#x0009;some a: Arrival | {&#x000a;&#x0009;&#x0009;some (a.executed_actions.actions.elems :&gt; PacketMod)&#x000a;&#x0009;&#x0009;some (a.executed_actions.actions.elems :&gt; Output)&#x000a;&#x0009;&#x0009;#(a.executed_actions.actions) = 2 -- Show a minimal example&#x000a;&#x0009;&#x0009;output_is_executed[a]&#x000a;&#x0009;&#x0009;packet_is_modified[a]&#x000a;&#x0009;&#x0009;&#x000a;&#x0009;&#x0009;reordering_affects_output[a]&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;run showOutputReordering for 5 but 5 int, 5 Switch, 7 ActionList, &#x000a;&#x0009;&#x0009;&#x0009;exactly 1 Arrival, 0 Learn, 0 Alert, 0 Drop&#x000a;&#x000a;--&#x000a;-- Assertions&#x000a;-- - Only learn causes executions&#x000a;-- - Reordered learns with intersecting match criteria implies&#x000a;--   that reordering had an effect on the flow tables&#x000a;--&#x000a;&#x000a;-- We can show that, if a reordering of learns had some effect on the&#x000a;-- rule tables, there were some number of reordered learns that had&#x000a;-- the same match criteria.&#x000a;assert reordered_learns_causes_effect {&#x000a;&#x0009;all e: Event /*, disj l1, l2: e.executed_actions.actions.elems*/ | {&#x000a;&#x0009;&#x0009;&#x0009;reordering_affects_rules[e] implies&#x000a;&#x0009;&#x0009;&#x0009;let amdi = min[((e.executed_actions.actions -&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009; e.permuted_actions.actions)).Action] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;let d = e.executed_actions.actions.subseq[amdi,&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;e.executed_actions.actions.lastIdx] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;--l1 in diff[Int] and l2 in diff[Int] and&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;--l1.rule.ActionList = l2.rule.ActionList&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;-- If a set of learns has overlapping match criteria, the length&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;-- of the set of the match criteria will be smaller than the&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;-- set of learns&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;#d != #(d.elems.rule.ActionList)&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;check reordered_learns_causes_effect for 5 but 5 Int, 5 Switch, 7 ActionList, exactly 1 Arrival&#x000a;&#x000a;&#x000a;-- We need to ensure that only learn actions can change switches&#x000a;assert only_learn_changes {&#x000a;&#x0009;all e : Event | {&#x000a;&#x0009;&#x0009;all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {&#x000a;&#x0009;&#x0009;&#x0009;let idx&apos; = add[idx, 1] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;e.exec_steps_permuted[idx] != e.exec_steps_permuted[idx&apos;] =&gt;&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;e.executed_actions.actions[idx] in Learn else&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;e.executed_actions.actions[idx] not in Learn&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;&#x000a;check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch&#x000a;&#x000a;&#x000a;assert only_packetmod_changes_packet {&#x000a;&#x0009;all a: Arrival | {&#x000a;&#x0009;&#x0009;all idx: a.packets.inds - a.packets.lastIdx | {&#x000a;&#x0009;&#x0009;&#x0009;let idx&apos; = add[idx, 1] | {&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;(a.packets[idx] != a.packets[idx&apos;]) implies &#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;(a.executed_actions.actions[idx] in PacketMod)&#x000a;&#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;(a.permuted_packets[idx] != a.permuted_packets[idx&apos;]) implies &#x000a;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;(a.permuted_actions.actions[idx] in PacketMod)&#x0009;&#x0009;&#x0009;&#x0009;&#x0009;&#x000a;&#x0009;&#x0009;&#x0009;}&#x000a;&#x0009;&#x0009;}&#x000a;&#x0009;}&#x000a;}&#x000a;check only_packetmod_changes_packet for 5 but 5 Int, exactly 1 Arrival, 7 ActionList&#x000a;"/>
+
+<source filename="/$alloy4$/models/util/integer.als" content="module util/integer&#x000a;&#x000a;/*&#x000a; * A collection of utility functions for using Integers in Alloy.&#x000a; * Note that integer overflows are silently truncated to the current bitwidth&#x000a; * using the 2&apos;s complement arithmetic, unless the &quot;forbid overfows&quot; option is&#x000a; * turned on, in which case only models that don&apos;t have any overflows are &#x000a; * analyzed. &#x000a; */&#x000a;&#x000a;fun add  [n1, n2: Int] : Int { this/plus[n1, n2] }&#x000a;fun plus [n1, n2: Int] : Int { n1 fun/add n2 }&#x000a;&#x000a;fun sub   [n1, n2: Int] : Int { this/minus[n1, n2] }&#x000a;fun minus [n1, n2: Int] : Int { n1 fun/sub n2 }&#x000a;&#x000a;fun mul [n1, n2: Int] : Int { n1 fun/mul n2 }&#x000a;&#x000a;/**&#x000a; * Performs the division with &quot;round to zero&quot; semantics, except the following 3 cases&#x000a; * 1) if a is 0, then it returns 0&#x000a; * 2) else if b is 0, then it returns 1 if a is negative and -1 if a is positive&#x000a; * 3) else if a is the smallest negative integer, and b is -1, then it returns a&#x000a; */&#x000a;fun div [n1, n2: Int] : Int { n1 fun/div n2 }&#x000a;&#x000a;/** answer is defined to be the unique integer that satisfies &quot;a = ((a/b)*b) + remainder&quot; */&#x000a;fun rem [n1, n2: Int] : Int { n1 fun/rem n2 }&#x000a;&#x000a;/** negate */&#x000a;fun negate [n: Int] : Int { 0 fun/sub n }&#x000a;&#x000a;/** equal to */&#x000a;pred eq [n1, n2: Int] { int[n1] = int[n2] }&#x000a;&#x000a;/** greater than */&#x000a;pred gt [n1, n2: Int] { n1 &gt; n2 }&#x000a;&#x000a;/** less then */&#x000a;pred lt [n1, n2: Int] { n1 &lt; n2 }&#x000a;&#x000a;/** greater than or equal */&#x000a;pred gte [n1, n2: Int] { n1 &gt;= n2 }&#x000a;&#x000a;/** less than or equal */&#x000a;pred lte [n1, n2: Int] { n1 &lt;= n2 }&#x000a;&#x000a;/** integer is zero */&#x000a;pred zero [n: Int] { n = 0 }&#x000a;&#x000a;/** positive */&#x000a;pred pos  [n: Int] { n &gt; 0 }&#x000a;&#x000a;/** negative */&#x000a;pred neg  [n: Int] { n &lt; 0 }&#x000a;&#x000a;/** non-positive */&#x000a;pred nonpos [n: Int] { n &lt;= 0 }&#x000a;&#x000a;/** non-negative */&#x000a;pred nonneg [n: Int] { n &gt;= 0 }&#x000a;&#x000a;/** signum (aka sign or sgn) */&#x000a;fun signum [n: Int] : Int { n&lt;0 =&gt; (0 fun/sub 1) else (n&gt;0 =&gt; 1 else 0) }&#x000a;&#x000a;/**&#x000a; * returns the ith element (zero-based) from the set s&#x000a; * in the ordering of &apos;next&apos;, which is a linear ordering&#x000a; * relation like that provided by util/ordering&#x000a; */&#x000a;fun int2elem[i: Int, next: univ-&gt;univ, s: set univ] : lone s {&#x000a;  {e: s | #^next.e = int i }&#x000a;}&#x000a;&#x000a;/**&#x000a; * returns the index of the element (zero-based) in the&#x000a; * ordering of next, which is a linear ordering relation&#x000a; * like that provided by util/ordering&#x000a; */&#x000a;fun elem2int[e: univ, next: univ-&gt;univ] : lone Int {&#x000a;  Int[#^next.e]&#x000a;}&#x000a;&#x000a;/** returns the largest integer in the current bitwidth */&#x000a;fun max:one Int { fun/max }&#x000a;&#x000a;/** returns the smallest integer in the current bitwidth */&#x000a;fun min:one Int { fun/min }&#x000a;&#x000a;/** maps each integer (except max) to the integer after it */&#x000a;fun next:Int-&gt;Int { fun/next }&#x000a;&#x000a;/** maps each integer (except min) to the integer before it */&#x000a;fun prev:Int-&gt;Int { ~next }&#x000a;&#x000a;/** given a set of integers, return the largest element */&#x000a;fun max [es: set Int]: lone Int { es - es.^prev }&#x000a;&#x000a;/** given a set of integers, return the smallest element */&#x000a;fun min [es: set Int]: lone Int { es - es.^next }&#x000a;&#x000a;/** given an integer, return all integers prior to it */&#x000a;fun prevs [e: Int]: set Int { e.^prev }&#x000a;&#x000a;/** given an integer, return all integers following it */&#x000a;fun nexts [e: Int]: set Int { e.^next }&#x000a;&#x000a;/** returns the larger of the two integers */&#x000a;fun larger [e1, e2: Int]: Int { let a=int[e1], b=int[e2] | (a&lt;b =&gt; b else a) }&#x000a;&#x000a;/** returns the smaller of the two integers */&#x000a;fun smaller [e1, e2: Int]: Int { let a=int[e1], b=int[e2] | (a&lt;b =&gt; a else b) }&#x000a;"/>
+
+<source filename="/$alloy4$/models/util/ordering.als" content="module util/ordering[exactly elem]&#x000a;&#x000a;/*&#x000a; * Creates a single linear ordering over the atoms in elem. It also constrains all&#x000a; * the atoms to exist that are permitted by the scope on elem. That is, if the scope&#x000a; * on a signature S is 5, opening util/ordering[S] will force S to have 5 elements&#x000a; * and create a linear ordering over those five elements. The predicates and&#x000a; * functions below provide access to properties of the linear ordering, such as&#x000a; * which element is first in the ordering, or whether a given element precedes&#x000a; * another. You cannotcreate multiple linear orderings over the same signature with&#x000a; * this model. If you that functionality, try using the util/sequence module instead.&#x000a; *&#x000a; * Technical comment:&#x000a; * An important constraint: elem must contain all atoms permitted by the scope.&#x000a; * This is to let the analyzer optimize the analysis by setting all fields of each&#x000a; * instantiation of Ord to predefined values: e.g. by setting &apos;last&apos; to the highest&#x000a; * atom of elem and by setting &apos;next&apos; to {&lt;T0,T1&gt;,&lt;T1,T2&gt;,...&lt;Tn-1,Tn&gt;}, where n is&#x000a; * the scope of elem. Without this constraint, it might not be true that Ord.last is&#x000a; * a subset of elem, and that the domain and range of Ord.next lie inside elem.&#x000a; *&#x000a; * author: Ilya Shlyakhter&#x000a; * revisions: Daniel jackson&#x000a; */&#x000a;&#x000a;private one sig Ord {&#x000a;   First: set elem,&#x000a;   Next: elem -&gt; elem&#x000a;} {&#x000a;   pred/totalOrder[elem,First,Next]&#x000a;}&#x000a;&#x000a;/** first */&#x000a;fun first: one elem { Ord.First }&#x000a;&#x000a;/** last */&#x000a;fun last: one elem { elem - (next.elem) }&#x000a;&#x000a;/** return a mapping from each element to its predecessor */&#x000a;fun prev : elem-&gt;elem { ~(Ord.Next) }&#x000a;&#x000a;/** return a mapping from each element to its successor */&#x000a;fun next : elem-&gt;elem { Ord.Next }&#x000a;&#x000a;/** return elements prior to e in the ordering */&#x000a;fun prevs [e: elem]: set elem { e.^(~(Ord.Next)) }&#x000a;&#x000a;/** return elements following e in the ordering */&#x000a;fun nexts [e: elem]: set elem { e.^(Ord.Next) }&#x000a;&#x000a;/** e1 is less than e2 in the ordering */&#x000a;pred lt [e1, e2: elem] { e1 in prevs[e2] }&#x000a;&#x000a;/** e1 is greater than e2 in the ordering */&#x000a;pred gt [e1, e2: elem] { e1 in nexts[e2] }&#x000a;&#x000a;/** e1 is less than or equal to e2 in the ordering */&#x000a;pred lte [e1, e2: elem] { e1=e2 || lt [e1,e2] }&#x000a;&#x000a;/** e1 is greater than or equal to e2 in the ordering */&#x000a;pred gte [e1, e2: elem] { e1=e2 || gt [e1,e2] }&#x000a;&#x000a;/** returns the larger of the two elements in the ordering */&#x000a;fun larger [e1, e2: elem]: elem { lt[e1,e2] =&gt; e2 else e1 }&#x000a;&#x000a;/** returns the smaller of the two elements in the ordering */&#x000a;fun smaller [e1, e2: elem]: elem { lt[e1,e2] =&gt; e1 else e2 }&#x000a;&#x000a;/**&#x000a; * returns the largest element in es&#x000a; * or the empty set if es is empty&#x000a; */&#x000a;fun max [es: set elem]: lone elem { es - es.^(~(Ord.Next)) }&#x000a;&#x000a;/**&#x000a; * returns the smallest element in es&#x000a; * or the empty set if es is empty&#x000a; */&#x000a;fun min [es: set elem]: lone elem { es - es.^(Ord.Next) }&#x000a;&#x000a;assert correct {&#x000a;  let mynext = Ord.Next |&#x000a;  let myprev = ~mynext | {&#x000a;     ( all b:elem | (lone b.next) &amp;&amp; (lone b.prev) &amp;&amp; (b !in b.^mynext) )&#x000a;     ( (no first.prev) &amp;&amp; (no last.next) )&#x000a;     ( all b:elem | (b!=first &amp;&amp; b!=last) =&gt; (one b.prev &amp;&amp; one b.next) )&#x000a;     ( !one elem =&gt; (one first &amp;&amp; one last &amp;&amp; first!=last &amp;&amp; one first.next &amp;&amp; one last.prev) )&#x000a;     ( one elem =&gt; (first=elem &amp;&amp; last=elem &amp;&amp; no myprev &amp;&amp; no mynext) )&#x000a;     ( myprev=~mynext )&#x000a;     ( elem = first.*mynext )&#x000a;     (all disj a,b:elem | a in b.^mynext or a in b.^myprev)&#x000a;     (no disj a,b:elem | a in b.^mynext and a in b.^myprev)&#x000a;     (all disj a,b,c:elem | (b in a.^mynext and c in b.^mynext) =&gt;(c in a.^mynext))&#x000a;     (all disj a,b,c:elem | (b in a.^myprev and c in b.^myprev) =&gt;(c in a.^myprev))&#x000a;  }&#x000a;}&#x000a;run {} for exactly 0 elem expect 0&#x000a;run {} for exactly 1 elem expect 1&#x000a;run {} for exactly 2 elem expect 1&#x000a;run {} for exactly 3 elem expect 1&#x000a;run {} for exactly 4 elem expect 1&#x000a;check correct for exactly 0 elem&#x000a;check correct for exactly 1 elem&#x000a;check correct for exactly 2 elem&#x000a;check correct for exactly 3 elem&#x000a;check correct for exactly 4 elem&#x000a;check correct for exactly 5 elem&#x000a;"/>
+
+<source filename="/$alloy4$/models/util/sequniv.als" content="module util/sequniv&#x000a;&#x000a;open util/integer as ui&#x000a;&#x000a;/*&#x000a; * NOTE: Do not include this module manually.&#x000a; * Instead, use the &quot;seq&quot; keyword which will automatically&#x000a; * import this module with the correct additional constraints as needed.&#x000a; */&#x000a;&#x000a;/*&#x000a; * A sequence utility for modeling sequences as just a&#x000a; * relation as opposed to reifying them into sequence&#x000a; * atoms like the util/sequence module does.&#x000a; *&#x000a; * Precondition: each input sequence must range over a prefix&#x000a; * of seq/Int.&#x000a; *&#x000a; * Postcondition: we guarantee the returned sequence&#x000a; * also ranges over a prefix of seq/Int.&#x000a; *&#x000a; * @author Greg Dennis&#x000a; */&#x000a;&#x000a;/** sequence covers a prefix of seq/Int */&#x000a;pred isSeq[s: Int -&gt; univ] {&#x000a;  s in seq/Int -&gt; lone univ&#x000a;  s.inds - ui/next[s.inds] in 0&#x000a;}&#x000a;&#x000a;/** returns all the elements in this sequence */&#x000a;fun elems [s: Int -&gt; univ]: set (Int.s) { seq/Int . s }&#x000a;&#x000a;/**&#x000a; * returns the first element in the sequence&#x000a; * (Returns the empty set if the sequence is empty)&#x000a; */&#x000a;fun first [s: Int -&gt; univ]: lone (Int.s) { s[0] }&#x000a;&#x000a;/**&#x000a; * returns the last element in the sequence&#x000a; * (Returns the empty set if the sequence is empty)&#x000a; */&#x000a;fun last [s: Int -&gt; univ]: lone (Int.s) { s[lastIdx[s]] }&#x000a;&#x000a;/**&#x000a; * returns the cdr of the sequence&#x000a; * (Returns the empty sequence if the sequence has 1 or fewer element)&#x000a; */&#x000a;fun rest [s: Int -&gt; univ] : s { seq/Int &lt;: ((ui/next).s) }&#x000a;&#x000a;/** returns all but the last element of the sequence */&#x000a;fun butlast [s: Int -&gt; univ] : s {&#x000a;  (seq/Int - lastIdx[s]) &lt;: s&#x000a;}&#x000a;&#x000a;/** true if the sequence is empty */&#x000a;pred isEmpty [s: Int -&gt; univ] { no s }&#x000a;&#x000a;/** true if this sequence has duplicates */&#x000a;pred hasDups [s: Int -&gt; univ] { # elems[s] &lt; # inds[s] }&#x000a;&#x000a;/** returns all the indices occupied by this sequence */&#x000a;fun inds [s: Int -&gt; univ]: set Int { s.univ }&#x000a;&#x000a;/**&#x000a; * returns last index occupied by this sequence&#x000a; * (Returns the empty set if the sequence is empty)&#x000a; */&#x000a;fun lastIdx [s: Int -&gt; univ]: lone Int { ui/max[inds[s]] }&#x000a;&#x000a;/**&#x000a; * returns the index after the last index&#x000a; * if this sequence is empty, returns 0&#x000a; * if this sequence is full, returns empty set&#x000a; */&#x000a;fun afterLastIdx [s: Int -&gt; univ] : lone Int { ui/min[seq/Int - inds[s]] }&#x000a;&#x000a;/** returns first index at which given element appears or the empty set if it doesn&apos;t */&#x000a;fun idxOf [s: Int -&gt; univ, e: univ] : lone Int { ui/min[indsOf[s, e]] }&#x000a;&#x000a;/** returns last index at which given element appears or the empty set if it doesn&apos;t */&#x000a;fun lastIdxOf [s: Int -&gt; univ, e: univ] : lone Int { ui/max[indsOf[s, e]] }&#x000a;&#x000a;/** returns set of indices at which given element appears or the empty set if it doesn&apos;t */&#x000a;fun indsOf [s: Int -&gt; univ, e: univ] : set Int { s.e }&#x000a;&#x000a;/**&#x000a; * return the result of appending e to the end of s&#x000a; * (returns s if s exhausted seq/Int)&#x000a; */&#x000a;fun add [s: Int -&gt; univ, e: univ] : s + (seq/Int-&gt;e) {&#x000a;  setAt[s, afterLastIdx[s], e]&#x000a;}&#x000a;&#x000a;/**&#x000a; * returns the result of setting the value at index i in sequence to e&#x000a; * Precondition: 0 &lt;= i &lt; #s&#x000a; */&#x000a;fun setAt [s: Int -&gt; univ, i: Int, e: univ] : s + (seq/Int-&gt;e) {&#x000a;  s ++ i -&gt; e&#x000a;}&#x000a;&#x000a;/**&#x000a; * returns the result of inserting value e at index i&#x000a; * (if sequence was full, the original last element will be removed first)&#x000a; * Precondition: 0 &lt;= i &lt;= #s&#x000a; */&#x000a;fun insert [s: Int -&gt; univ, i: Int, e: univ] : s + (seq/Int-&gt;e) {&#x000a;  seq/Int &lt;: ((ui/prevs[i] &lt;: s) + (i-&gt;e) + ui/prev.((ui/nexts[i] + i) &lt;: s))&#x000a;}&#x000a;&#x000a;/**&#x000a; * returns the result of deleting the value at index i&#x000a; * Precondition: 0 &lt;= i &lt; #s&#x000a; */&#x000a;fun delete[s: Int -&gt; univ, i: Int] : s {&#x000a;  (ui/prevs[i] &lt;: s) + (ui/next).(ui/nexts[i] &lt;: s)&#x000a;}&#x000a;&#x000a;/**&#x000a; * appended is the result of appending s2 to s1&#x000a; * (If the resulting sequence is too long, it will be truncated)&#x000a; */&#x000a;fun append [s1, s2: Int -&gt; univ] : s1+s2 {&#x000a;  let shift = {i&apos;, i: seq/Int | int[i&apos;] = ui/add[int[i], ui/add[int[lastIdx[s1]], 1]] } |&#x000a;    no s1 =&gt; s2 else (s1 + shift.s2)&#x000a;}&#x000a;&#x000a;/**&#x000a; * returns the subsequence of s between from and to, inclusive&#x000a; * Precondition: 0 &lt;= from &lt;= to &lt; #s&#x000a; */&#x000a;fun subseq [s: Int -&gt; univ, from, to: Int] : s {&#x000a;  let shift = {i&apos;, i: seq/Int | int[i&apos;] = ui/sub[int[i], int[from]] } |&#x000a;    shift.((seq/Int - ui/nexts[to]) &lt;: s)&#x000a;}&#x000a;"/>
+
+</alloy>
