@@ -218,6 +218,16 @@ fact packet_mod_reordered {
 	}
 }
 
+-- We can "canonicalize" our outputs to ensure that no two
+-- output atoms have the packets, which prevents Alloy from generating
+-- different Output atoms for the same packet and match atoms.
+fact canonicalize_outputs {
+	no disj o1, o2: Output | {
+		--o1.out_packet = o2.out_packet
+		o1.out_packet.match = o2.out_packet.match
+	}
+}
+
 pred modifyPackets[pkts: seq Packet, acts: ActionList] {
   -- If executing a PacketMod at a given step, the new match
   -- criteria in the PacketMod action becomes the packet's match
@@ -286,6 +296,8 @@ pred is_permutation_weak_output[s: seq Action, s': seq Action] {
 	#(s.elems :> Output) = #(s'.elems :> Output)
 }
 
+
+
 -- ****** Examples ******
 
 pred learn_is_executed {
@@ -293,8 +305,6 @@ pred learn_is_executed {
 		e.pre.switch != e.post.switch
 	}
 }
-
-run { learn_is_executed } for 5 but 5 Int, 5 Switch
 
 -- Reordering had some effect on the output if the switch rules were
 -- different at the end of the ideal and permuted execution steps.
@@ -392,17 +402,24 @@ pred actions_are_swapped[e: Event, a1: Action, a2 : Action] {
 
 -- One issue was when the permutation preserved order of PacketMods
 -- (Drop, PM1, PM2) & (PM1, PM2, Drop)
--- Takeaway:  Permutations that preserve relative ordering of PacketMods
---            don't affect the final output of the switch, which is good.
+-- Takeaway:  
+--    1. Permutations that preserve relative ordering of PacketMods
+--       don't affect the final output of the switch, which is good.
+--    2. It would be nice and clean if this were a bijection, but
+--       this is not possible becuase some reorderings may not affect
+--       the final state of the packet.
 assert reorder_packet_mod {
 	all e: Arrival  | { 
-		-- If the last matches differ, then there was a PacketMod that was swapped
-		e.packets.last.match != e.permuted_packets.last.match 
+		-- (1) If the last matches differ, then there was a PacketMod that was swapped
+		reordering_affects_packet_processing[e]
 		implies
 		(
 			some PacketMod & (e.executed_actions.actions - e.permuted_actions.actions)[Int]
 		)
 
+
+		-- (2) We can try to write the same assertion in the other direction,
+		-- but we need to account for reorderings that don't affect the final output.
 		-- If there are 2 packet mods, and they're swapped, then the final 
 		-- packet values will be different
 		(
@@ -415,15 +432,10 @@ assert reorder_packet_mod {
 			-- There are no overlapping PacketMods
 			#(e.executed_actions.actions.elems :> PacketMod) = 
 				#((e.executed_actions.actions.elems :> PacketMod).new_match)
-/*
-		all disj pm1, pm2:  (e.executed_actions.actions.elems :> PacketMod) | {
-			pm1.new_match != pm2.new_match
-		}
-*/
 		)
 		implies
 		(
-			e.packets.last.match != e.permuted_packets.last.match 
+			reordering_affects_packet_processing[e]
 		)
 	}
 }
@@ -437,21 +449,24 @@ check reorder_packet_mod for 4 but 4 Int, 5 Switch, 7 ActionList, exactly 1 Arri
 -- Takeway:  Learn actions that *don't* use packet fields can tolerate reordering with PacketMods.
 assert reorder_packet_mod_and_learn_without_using_packet {
 	all e : Event | {
-		-- All learns that have been moved
-		all learn : (e.executed_actions.actions - e.permuted_actions.actions)[Int] <: Learn | {
-			(
-				-- All learns have unique Matches
-				(no Learn.use_packet & 1) and -- No Learns use_packet
-				#(e.executed_actions.actions.elems <: Learn) = 
-					#((e.executed_actions.actions.elems <: Learn).rule.ActionList) and
-				#(e.executed_actions.actions.subseq[0, e.executed_actions.actions.idxOf[learn]][Int] <: PacketMod) !=
-					#(e.permuted_actions.actions.subseq[0, e.permuted_actions.actions.idxOf[learn]][Int] <: PacketMod) 
-			)
-			implies
-			(
-				e.exec_steps_permuted.last.rules[learn.rule.ActionList] = 
-					e.exec_steps_ideal.last.rules[learn.rule.ActionList] 
-			)
+		let executed_acts = e.executed_actions.actions,
+				permuted_acts = e.permuted_actions.actions | {
+			-- All learns that have been moved
+			all learn : (executed_acts - permuted_acts)[Int] <: Learn | {
+				(
+					-- All learns have unique Matches
+					(no Learn.use_packet & 1) and -- No Learns use_packet
+					#(executed_acts.elems <: Learn) = 
+						#(executed_acts.elems <: Learn).rule.ActionList and
+					#(executed_acts.subseq[0, executed_acts.idxOf[learn]][Int] <: PacketMod) !=
+						#(permuted_acts.subseq[0, permuted_acts.idxOf[learn]][Int] <: PacketMod) 
+				)
+				implies
+				(
+					e.exec_steps_permuted.last.rules[learn.rule.ActionList] = 
+						e.exec_steps_ideal.last.rules[learn.rule.ActionList] 
+				)
+			}
 		}
 	}
 }
@@ -498,10 +513,7 @@ assert only_last_packetmod_affects_output {
 					(pm1.new_match = pm2.new_match))
 					implies
 					-- The two output actions should be equal
-					(o1.out_packet.match = o2.out_packet.match)
-
-					-- If we canonicalize outputs, we can write the following insetad:
-					--(o1.out_packet = o2.out_packet)
+					(o1.out_packet = o2.out_packet)
 				}
 		}
 	}
