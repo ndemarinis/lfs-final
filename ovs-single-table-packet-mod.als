@@ -51,6 +51,10 @@ sig State {
 	switch: one Switch,
 }
 
+sig Packet {
+	match: one Match
+}
+
 abstract sig Event {
 	pre, post: State,
 	exec_steps: seq Switch,
@@ -62,6 +66,18 @@ abstract sig Event {
 	exec_steps.last = post.switch
 }
 
+sig Arrival extends Event {
+    -- First packet is the one that actually arrives on a switch,
+    -- future packets (with modifications) might ensure that the packet changes
+	--packet: one Packet
+	packet: Packet,
+	packets: seq Packet
+} {
+	actions_executed = get_matching_actions[pre.switch, packet]
+	packet = packets[0] -- Initialize the first packet
+	#packets = add[#(actions_executed.actions.inds), 1]
+}
+
 fact transitions {
 	all e: Event - eo/last | {
 		let eNext = e.next | {
@@ -69,7 +85,6 @@ fact transitions {
 		}
 	}
 }
-
 
 fact exection_steps {
 	all e : Event | {
@@ -107,18 +122,6 @@ fact one_catchall {
 	one CatchallMatch
 }
 
-sig Arrival extends Event {
-    -- First packet is the one that actually arrives on a switch,
-    -- future packets (with modifications) might ensure that the packet changes
-	--packet: one Packet
-	packet: Packet,
-	packets: seq Packet
-} {
-	actions_executed = get_matching_actions[pre.switch, packet]
-	packet = packets[0] -- Initialize the first packet
-	#packets = add[#(actions_executed.actions.inds), 1]
-}
-
 fact packet_mod_holds {
         -- If executing a PacketMod at a given step, the new match
         -- criteria in the PacketMod action becomes the packet's match
@@ -135,7 +138,6 @@ fact packet_mod_holds {
 						e.packets[idx'].match = (e.actions_executed.actions[idx] <: PacketMod).new_match 
 					} else { -- If we weren't executing a PacketMod, the packet itself should not change
 						e.packets[idx] = e.packets[idx']
---					e.packets[idx].match = e.packets[idx'].match
 					}
 			}
 		}
@@ -151,32 +153,6 @@ fact packet_mod_holds {
 	}
 
 }
-
-
-sig Packet {
-	match: one Match
-}
-
--- Facts
---  - Only new rules are added by learns
---  -
-
-
-fact force_learn {
-	some e: Event | {
-		e.pre.switch != e.post.switch
-	}
-}
-
-
---run {} for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
-/*
-run {
-	some a : Arrival | {
-		#a.packets.elems > 1
-	}
-} for 2 but 5 Int, exactly 1 Arrival, 5 Switch, 1 PacketMod, exactly 5 Match, 0 Learn
-*/
 
 run {
 	some a : Arrival | {
@@ -208,9 +184,8 @@ assert only_learn_changes {
 	all e : Event | {
 		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
 			let idx' = add[idx, 1] | {
-				e.exec_steps[idx] != e.exec_steps[idx'] =>
-					e.actions_executed.actions[idx] in Learn else
-					e.actions_executed.actions[idx] not in Learn
+				e.exec_steps[idx] != e.exec_steps[idx'] implies
+					e.actions_executed.actions[idx] in Learn 
 			}
 		}
 	}

@@ -115,7 +115,6 @@ fact transitions {
 	}
 }
 
-
  -- Define execution steps with reordering
 fact execution_steps_permuted {
 	all e : Event | {
@@ -455,3 +454,5 @@ assert only_packetmod_changes_packet {
 	}
 }
 check only_packetmod_changes_packet for 5 but 5 Int, exactly 1 Arrival, 7 ActionList
+
+
