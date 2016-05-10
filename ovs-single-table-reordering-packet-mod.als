@@ -428,15 +428,14 @@ assert only_learn_changes {
 	all e : Event | {
 		all idx : e.exec_steps_permuted.inds - e.exec_steps_permuted.lastIdx | {
 			let idx' = add[idx, 1] | {
-				e.exec_steps_permuted[idx] != e.exec_steps_permuted[idx'] =>
-					e.executed_actions.actions[idx] in Learn else
-					e.executed_actions.actions[idx] not in Learn
+				e.exec_steps_ideal[idx] != e.exec_steps_ideal[idx'] implies
+					e.executed_actions.actions[idx] in Learn
 			}
 		}
 	}
 }
 
-check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch
+check only_learn_changes for 5 but 5 Int, exactly 1 Arrival, 5 Switch
 
 
 -- Only a PacketMod can cause a rule change

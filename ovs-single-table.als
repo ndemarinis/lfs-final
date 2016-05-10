@@ -155,11 +155,10 @@ assert only_learn_changes {
 		all idx : e.exec_steps.inds - e.exec_steps.lastIdx | {
 			let idx' = add[idx, 1] | {
 				e.exec_steps[idx] != e.exec_steps[idx'] =>
-					e.actions_executed.actions[idx] in Learn else
-					e.actions_executed.actions[idx] not in Learn
+					e.actions_executed.actions[idx] in Learn
 			}
 		}
 	}
 }
 
-check only_learn_changes for 2 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
+check only_learn_changes for 5 but 5 Int, exactly 1 Arrival, 5 Switch, exactly 1 Learn
